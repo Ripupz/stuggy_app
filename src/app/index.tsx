@@ -1,15 +1,139 @@
-import { Text, View } from "react-native";
+import { 
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  GestureResponderEvent,
+  KeyboardAvoidingView,
+  Platform
+} from "react-native";
+import { useFonts } from 'expo-font';
 
 export default function Index() {
+
+  const [fontsLoaded] = useFonts({
+    'TaskFont': require('../../assets/fonts/PermanentMarker-Regular.ttf'),
+  });
+
+  const login = (event: GestureResponderEvent) => {
+    console.log('Login pressed');
+  };
+  const signUp = (event: GestureResponderEvent) => {
+    console.log('Sign Up pressed');
+  };
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+    <KeyboardAvoidingView
+    style={styles.container}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  >
+    <SafeAreaView style={styles.container}>
+    <Image
+      source={require('../../assets/images/frogtoga-preview.png')}
+      style={styles.frog}
+      resizeMode="contain"
+    />
+
+    <Text style={styles.spacing}>
+      Manage your{'\n'}
+    </Text>
+    <Text style={styles.title}>
+      <Text style={styles.task}>TASK</Text>
+      <Text style={styles.title}> daily!</Text>
+    </Text>
+
+      <TouchableOpacity
+        style={styles.buttonLogin}
+        onPress={login}
+        accessible={true}
+        accessibilityLabel="Login button"
+        accessibilityHint="Press to log into your account"
+      >
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.buttonSignUp}
+        onPress={signUp}
+        accessible={true}
+        accessibilityLabel="Sign Up button"
+        accessibilityHint="Press to create a new account"
+      >
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  </KeyboardAvoidingView>
+);
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f7fbf6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  frog: {
+    width: '800%',       // Slightly exceed screen width for overflow effect
+    height: 900,         // Match height from your note
+    marginTop: -100,
+    marginBottom: 20,
+    resizeMode: 'cover', // Ensures it fills and crops as needed
+    alignSelf: 'center', // Keeps image centered
+    position: 'absolute', // Optional: to overlay content
+    top: 0,
+    zIndex: -1 
+  },
+  title: {
+    fontSize: 40,
+    color: '#9FCDA3',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: -30,
+    marginBottom: 40,
+  },
+  spacing: { //supaya misahin Manage your sama Task daily karna kalo ga gabisa atur spacing
+    fontSize: 40,
+    fontWeight: '700',
+    textAlign: 'center',
+    color: '#9FCDA3',
+    marginTop: 200,
+  },
+  task: {
+    color: '#dd4a48',
+    fontWeight: '900',
+    fontFamily: 'TaskFont',
+    textDecorationLine: 'underline'
+  },
+  buttonLogin: {
+    backgroundColor: '#9cadce',
+    paddingVertical: 15,
+    paddingHorizontal: 130,
+    borderRadius: 25,
+    marginVertical: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  buttonSignUp:{
+    backgroundColor: '#9cadce',
+    paddingVertical: 15,
+    paddingHorizontal: 120,
+    borderRadius: 25,
+    marginVertical: 10,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+});
