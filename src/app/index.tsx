@@ -83,15 +83,13 @@ const styles = StyleSheet.create({
     resizeMode: 'cover', // Ensures it fills and crops as needed
     alignSelf: 'center', // Keeps image centered
     position: 'absolute', // Optional: to overlay content
-    top: 0,
-    zIndex: -1 
   },
   title: {
     fontSize: 40,
     color: '#9FCDA3',
     fontWeight: '700',
     textAlign: 'center',
-    marginTop: -30,
+    marginTop: -10,
     marginBottom: 40,
   },
   spacing: { //supaya misahin Manage your sama Task daily karna kalo ga gabisa atur spacing
