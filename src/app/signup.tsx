@@ -1,71 +1,86 @@
 import React from 'react';
-import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-
 
 export default function SignUp() {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.heading}>Sign up{'\n'}</Text>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={60} // Adjust as needed based on header/nav height
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.heading}>Sign up{'\n'}</Text>
 
-        <SafeAreaView style={styles.innerContainer}>
-          <Image
-            source={require('../../assets/images/frog-signup.png')}
-            style={styles.frogImage}
-            resizeMode="contain"
-          />
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>enter email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="enter your email / username"
-              placeholderTextColor="#aaa"
+          <View style={styles.innerContainer}>
+            <Image
+              source={require('../../assets/images/frog-signup.png')}
+              style={styles.frogImage}
+              resizeMode="contain"
             />
-          </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>make a username</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="enter your email / username"
-              placeholderTextColor="#aaa"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>enter email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="enter your email"
+                placeholderTextColor="#aaa"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="enter your password"
-              secureTextEntry
-              placeholderTextColor="#aaa"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>make a username</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="make a username"
+                placeholderTextColor="#aaa"
+              />
+            </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>confirm password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="enter your password"
-              secureTextEntry
-              placeholderTextColor="#aaa"
-            />
-          </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="enter your password"
+                secureTextEntry
+                placeholderTextColor="#aaa"
+              />
+            </View>
 
-          <TouchableOpacity style={styles.signupButton}>
-            <Text style={styles.signupButtonText}>Sign up</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>confirm password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="enter your password"
+                secureTextEntry
+                placeholderTextColor="#aaa"
+              />
+            </View>
+
+            <TouchableOpacity style={styles.signupButton}>
+              <Text style={styles.signupButtonText}>Sign up</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -127,4 +142,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+
+  scrollContainer: {
+    paddingBottom: 40,
+},
+
 });
