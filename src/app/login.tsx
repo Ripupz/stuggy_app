@@ -1,8 +1,21 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Image, KeyboardAvoidingView,
+  Platform, StyleSheet, Text, TextInput,
+  TouchableOpacity, View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Login() {
+
+  const router = useRouter(); // <-- Get the router instance
+
+  const Homepage = () => {
+    console.log('homepage pressed');
+    router.push('/homepage');
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -39,7 +52,7 @@ export default function Login() {
           />
         </View>
 
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity style={styles.loginButton} onPress={Homepage}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
       </SafeAreaView>
