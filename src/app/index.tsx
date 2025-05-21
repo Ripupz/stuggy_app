@@ -1,16 +1,16 @@
-import { 
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
-  GestureResponderEvent,
-  KeyboardAvoidingView,
-  Platform
-} from "react-native";
 import { useFonts } from 'expo-font';
+import { useRouter } from 'expo-router';
 import React from 'react';
+import {
+  GestureResponderEvent,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity
+} from "react-native";
 
 export default function Index() {
 
@@ -18,17 +18,22 @@ export default function Index() {
     'TaskFont': require('../../assets/fonts/PermanentMarker-Regular.ttf'),
   });
 
+  const router = useRouter();
+
   const login = (event: GestureResponderEvent) => {
     console.log('Login pressed');
+    router.push('/login');
   };
+
   const signUp = (event: GestureResponderEvent) => {
     console.log('Sign Up pressed');
   };
+
   return (
     <KeyboardAvoidingView
-    style={styles.container}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  >
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
     <SafeAreaView style={styles.container}>
     <Image
       source={require('../../assets/images/frogtoga-preview.png')}
