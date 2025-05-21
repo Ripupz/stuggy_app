@@ -7,7 +7,8 @@ import {
   SafeAreaView,
   GestureResponderEvent,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Dimensions
 } from "react-native";
 import { useFonts } from 'expo-font';
 import React from 'react';
@@ -68,6 +69,8 @@ export default function Index() {
 );
 }
 
+const screenWidth = Dimensions.get('window').width;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     color: '#9FCDA3',
     fontWeight: '700',
     textAlign: 'center',
-    marginTop: -10,
+    marginTop: -50,
     marginBottom: 40,
   },
   spacing: { //supaya misahin Manage your sama Task daily karna kalo ga gabisa atur spacing
@@ -102,14 +105,14 @@ const styles = StyleSheet.create({
   },
   task: {
     color: '#dd4a48',
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: 'TaskFont',
     textDecorationLine: 'underline'
   },
   buttonLogin: {
     backgroundColor: '#9cadce',
-    paddingVertical: 15,
-    paddingHorizontal: 130,
+    paddingVertical: 12,
+    paddingHorizontal: 110,
     borderRadius: 25,
     marginVertical: 10,
     elevation: 3,
@@ -117,11 +120,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 2 },
+    width: screenWidth * 0.8,
+    alignItems: 'center',
   },
   buttonSignUp:{
     backgroundColor: '#9cadce',
-    paddingVertical: 15,
-    paddingHorizontal: 120,
+    paddingVertical: 12,
+    paddingHorizontal: 100,
     borderRadius: 25,
     marginVertical: 10,
     elevation: 3,
@@ -129,6 +134,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 2 },
+    width: screenWidth * 0.8,
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
