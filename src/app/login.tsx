@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   Image,
@@ -13,6 +14,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Login() {
+
+  const router = useRouter(); // <-- Get the router instance
+
+  const Homepage = () => {
+    console.log('homepage pressed');
+    router.push('/homepage');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -52,7 +61,7 @@ export default function Login() {
               />
             </View>
 
-            <TouchableOpacity style={styles.loginButton}>
+            <TouchableOpacity style={styles.loginButton} onPress={Homepage}>
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
