@@ -32,7 +32,7 @@ export default function Index() {
   >
     <SafeAreaView style={styles.container}>
     <Image
-      source={require('../../assets/images/frogtoga-preview.png')}
+      source={require('../../assets/images/Long_froggy.png')}
       style={styles.frog}
       resizeMode="contain"
     />
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   frog: {
-    width: '800%',       // Slightly exceed screen width for overflow effect
+    width: screenWidth,       // Slightly exceed screen width for overflow effect
     height: 900,         // Match height from your note
     marginTop: -100,
     marginBottom: 20,
