@@ -28,6 +28,7 @@ export default function Index() {
 
   const signUp = (event: GestureResponderEvent) => {
     console.log('Sign Up pressed');
+    router.push('/signup');
   };
 
   return (
