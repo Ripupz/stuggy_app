@@ -14,7 +14,7 @@ export default function Login() {
 
       <SafeAreaView style={styles.innerContainer}>
         <Image
-          source={require('../../assets/images/frog-login.png')} // 👈 replace with your frog image name
+          source={require('../../assets/images/frog-login.png')} 
           style={styles.frogImage}
           resizeMode="contain"
         />
