@@ -1,5 +1,9 @@
 import React from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
+
+
 
 const dates = [
   { date: '24', day: 'M' },
@@ -10,6 +14,9 @@ const dates = [
   { date: '01', day: 'S' },
   { date: '02', day: 'S' },
 ];
+
+const router = useRouter();
+
 
 export default function HomePage() {
   return (
@@ -47,20 +54,23 @@ export default function HomePage() {
 
       {/* Today's List & Score */}
       <View style={styles.row}>
-        <View style={styles.todoBox}>
+        <TouchableOpacity
+          style={styles.todoBox}
+          onPress={() => router.push('/task')}>
           <Text style={styles.sectionTitle}>Today's list</Text>
           <Text style={styles.listItem}>• Make Agenda</Text>
           <Text style={styles.listItem}>• Study Calculus</Text>
           <Text style={styles.listItem}>• Meeting</Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.scoreBox}>
           <View style={styles.titleScoreBox}>
-          <Text style={styles.sectionTitle}>Score</Text>
+            <Text style={styles.sectionTitle}>Score</Text>
           </View>
           <Text style={styles.scoreValue}>3.80</Text>
         </View>
       </View>
+
 
       {/* Forum */}
       <View style={styles.forumBox}>
