@@ -1,5 +1,15 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { 
+  Dimensions, 
+  Image, 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  TouchableOpacity, 
+  View,
+  GestureResponderEvent
+} from 'react-native';
 
 const dates = [
   { date: '24', day: 'M' },
@@ -12,6 +22,11 @@ const dates = [
 ];
 
 export default function HomePage() {
+  const forum = (event: GestureResponderEvent) => {
+    console.log('Forum pressed');
+    router.push('/forumDisc')
+  };
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Welcome */}
@@ -64,7 +79,9 @@ export default function HomePage() {
 
       {/* Forum */}
       <View style={styles.forumBox}>
-        <Text style={styles.sectionTitle}>FORUM</Text>
+        <TouchableOpacity style={styles.sectionTitle} onPress={forum}>
+          <Text style={styles.sectionTitle}>FORUM</Text>
+        </TouchableOpacity>
 
         <View style={styles.messageBox}>
           <Text style={styles.userName}>Jeni</Text>
