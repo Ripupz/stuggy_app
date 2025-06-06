@@ -1,5 +1,7 @@
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useRouter } from 'expo-router'; // 👈 Import router
 
 const dates = [
   { date: '24', day: 'M' },
@@ -12,76 +14,94 @@ const dates = [
 ];
 
 export default function HomePage() {
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Welcome */}
-      <Image
-        source={require('../../assets/images/FrogHome.png')}
-        style={styles.frogImage}
-        resizeMode="contain"
-      />
-      <Text style={styles.welcomeText}>Welcome Back,</Text>
-      <Text style={styles.nameText}>
-        Valen <Text style={styles.emoji}>👋</Text>
-      </Text>
+  const router = useRouter(); // 👈 Hook to control navigation
 
-      {/* Calendar */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
-        {dates.map((item, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dateBox,
-              item.selected && styles.selectedDateBox,
-            ]}
-          >
-            <Text style={[styles.dateText, item.selected && styles.selectedText]}>
-              {item.date}
-            </Text>
-            <Text style={[styles.dayText, item.selected && styles.selectedText]}>
-              {item.day}
-            </Text>
+  return (
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Welcome */}
+        <Image
+          source={require('../../assets/images/FrogHome.png')}
+          style={styles.frogImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.welcomeText}>Welcome Back,</Text>
+        <Text style={styles.nameText}>
+          Valen <Text style={styles.emoji}>👋</Text>
+        </Text>
+
+        {/* Calendar */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
+          {dates.map((item, index) => (
+            <View
+              key={index}
+              style={[styles.dateBox, item.selected && styles.selectedDateBox]}
+            >
+              <Text style={[styles.dateText, item.selected && styles.selectedText]}>
+                {item.date}
+              </Text>
+              <Text style={[styles.dayText, item.selected && styles.selectedText]}>
+                {item.day}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Today's List & Score */}
+        <View style={styles.row}>
+          <View style={styles.todoBox}>
+            <Text style={styles.sectionTitle}>Today's list</Text>
+            <Text style={styles.listItem}>• Make Agenda</Text>
+            <Text style={styles.listItem}>• Study Calculus</Text>
+            <Text style={styles.listItem}>• Meeting</Text>
           </View>
-        ))}
+
+          <View style={styles.scoreBox}>
+            <View style={styles.titleScoreBox}>
+              <Text style={styles.sectionTitle}>Score</Text>
+            </View>
+            <Text style={styles.scoreValue}>3.80</Text>
+          </View>
+        </View>
+
+        {/* Forum */}
+        <View style={styles.forumBox}>
+          <Text style={styles.sectionTitle}>FORUM</Text>
+
+          <View style={styles.messageBox}>
+            <Text style={styles.userName}>Jeni</Text>
+            <Text>Is there anyone who wants to join a study session</Text>
+          </View>
+
+          <View style={styles.messageBox}>
+            <Text style={styles.userName}>Syau</Text>
+            <Text>Any tips on how to stay consistent with your study plan...?</Text>
+          </View>
+        </View>
       </ScrollView>
 
-      {/* Today's List & Score */}
-      <View style={styles.row}>
-        <View style={styles.todoBox}>
-          <Text style={styles.sectionTitle}>Today's list</Text>
-          <Text style={styles.listItem}>• Make Agenda</Text>
-          <Text style={styles.listItem}>• Study Calculus</Text>
-          <Text style={styles.listItem}>• Meeting</Text>
-        </View>
-
-        <View style={styles.scoreBox}>
-          <View style={styles.titleScoreBox}>
-          <Text style={styles.sectionTitle}>Score</Text>
-          </View>
-          <Text style={styles.scoreValue}>3.80</Text>
-        </View>
+      {/* Bottom Navigation Bar */}
+      <View style={styles.navBar}>
+        <TouchableOpacity>
+          <Icon name="home" size={26} color="#49250D" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Icon name="chatbubble-ellipses-outline" size={26} color="#49250D" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/pomodoro')}> {/* 👈 Navigate to Pomodoro */}
+          <Icon name="timer-outline" size={26} color="#49250D" />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Icon name="stats-chart-outline" size={26} color="#49250D" />
+        </TouchableOpacity>
       </View>
-
-      {/* Forum */}
-      <View style={styles.forumBox}>
-        <Text style={styles.sectionTitle}>FORUM</Text>
-
-        <View style={styles.messageBox}>
-          <Text style={styles.userName}>Jeni</Text>
-          <Text>Is there anyone who wants to join a study session</Text>
-        </View>
-
-        <View style={styles.messageBox}>
-          <Text style={styles.userName}>Syau</Text>
-          <Text>Any tips on how to stay consistent with your study plan...?</Text>
-        </View>
-      </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const screenWidth = Dimensions.get('window').width;
 
+// 🧠 styles stay the same
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fdfaf5',
@@ -165,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: 170,
-    height: 150, 
+    height: 150,
   },
   titleScoreBox: {
     width: '100%',
@@ -207,6 +227,27 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 4.5,
+  },
+  navBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 95,
+    backgroundColor: '#fdfaf5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 10,
+    paddingBottom: 10,
   },
 });
