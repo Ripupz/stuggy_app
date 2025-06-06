@@ -1,10 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-<Ionicons name="home" size={26} color="#49250D" />
-
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface Props {
   active: 'home' | 'chat' | 'timer' | 'stats';
@@ -15,16 +11,16 @@ const BottomNavBar: React.FC<Props> = ({ active, onNavigate }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => onNavigate?.('homepage')}>
-        <Icon name="home" size={26} color={active === 'home' ? '#49250D' : '#888'} />
+        <Ionicons name="home" size={26} color={active === 'home' ? '#49250D' : '#888'} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => onNavigate?.('chat')}>
-        <Icon name="chatbubble-ellipses-outline" size={26} color={active === 'chat' ? '#49250D' : '#888'} />
+        <Ionicons name="chatbubble-ellipses-outline" size={26} color={active === 'chat' ? '#49250D' : '#888'} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => onNavigate?.('pomodoro')}>
-        <Icon name="timer-outline" size={26} color={active === 'timer' ? '#49250D' : '#888'} />
+        <Ionicons name="timer-outline" size={26} color={active === 'timer' ? '#49250D' : '#888'} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => onNavigate?.('stats')}>
-        <Icon name="stats-chart-outline" size={26} color={active === 'stats' ? '#49250D' : '#888'} />
+        <Ionicons name="stats-chart-outline" size={26} color={active === 'stats' ? '#49250D' : '#888'} />
       </TouchableOpacity>
     </View>
   );
