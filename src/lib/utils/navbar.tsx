@@ -15,13 +15,13 @@ const BottomNavBar: React.FC<Props> = ({ active }) => {
       <TouchableOpacity onPress={() => router.push('/homepage')}>
         <Ionicons name="home" size={26} color={active === 'home' ? '#49250D' : '#888'} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/')}>
+      <TouchableOpacity onPress={() => router.push('/forumDisc')}>
         <Ionicons name="chatbubble-ellipses-outline" size={26} color={active === 'chat' ? '#49250D' : '#888'} />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/pomodoro')}>
         <Ionicons name="timer-outline" size={26} color={active === 'timer' ? '#49250D' : '#888'} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/')}>
+      <TouchableOpacity onPress={() => router.push('/stats_goal')}>
         <Ionicons name="stats-chart-outline" size={26} color={active === 'stats' ? '#49250D' : '#888'} />
       </TouchableOpacity>
     </View>

@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, GestureResponderEvent, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BottomNavBar from '../lib/utils/navbar';
 import { useScore } from '../lib/utils/userCourses';
 
@@ -23,6 +23,11 @@ export default function HomePage() {
     ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2)
     : '--';
 
+  const forum = (event: GestureResponderEvent) => {
+    console.log('Forum pressed');
+    router.push('/forumDisc')
+  };
+  
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -76,17 +81,22 @@ export default function HomePage() {
         </View>
 
         {/* Forum */}
-        <View style={styles.forumBox}>
-          <Text style={styles.sectionTitle}>FORUM</Text>
-          <View style={styles.messageBox}>
-            <Text style={styles.userName}>Jeni</Text>
-            <Text>Is there anyone who wants to join a study session</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.push('/forumDisc')}
+        >
+          <View style={styles.forumBox}>
+            <Text style={styles.sectionTitle}>FORUM</Text>
+            <View style={styles.messageBox}>
+              <Text style={styles.userName}>Jeni</Text>
+              <Text>Is there anyone who wants to join a study session</Text>
+            </View>
+            <View style={styles.messageBox}>
+              <Text style={styles.userName}>Syau</Text>
+              <Text>Any tips on how to stay consistent with your study plan...?</Text>
+            </View>
           </View>
-          <View style={styles.messageBox}>
-            <Text style={styles.userName}>Syau</Text>
-            <Text>Any tips on how to stay consistent with your study plan...?</Text>
-          </View>
-        </View>
+        </TouchableOpacity>
       </ScrollView>
       <BottomNavBar active="home" />
     </View>
