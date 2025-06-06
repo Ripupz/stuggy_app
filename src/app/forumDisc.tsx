@@ -1,17 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import React from 'react';
-import { 
+import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View 
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
-
-const forumPosts = [ // ini mock data aja
+const forumPosts = [
   {
     id: '1',
     author: 'Jeni',
@@ -46,53 +45,54 @@ const forumPosts = [ // ini mock data aja
   },
 ];
 
-const PostCard = ({ post }) => {
+// Fix: Accept post as a prop
+const PostCard = ({ post }: { post: typeof forumPosts[0] }) => {
   return (
-    <View style={[styles.postCard, { backgroundColor: post.color }]}>
+    <View style={[styles.postCard, { backgroundColor: post.color, borderWidth: 1.5 }]}>
       <Text style={styles.postAuthor}>{post.author}</Text>
       <Text style={styles.postQuestion}>{post.question}</Text>
     </View>
   );
 };
 
-export default function ForumPage(){
-    return(
-        <SafeAreaView style={styles.container}>
-          <View style={styles.content}>
-            <ScrollView>
-              {/* ini header */}
-              <View style={styles.header}>
-                <TouchableOpacity>
-                  <Ionicons name='arrow-back' size={24} color='black'/>
-                </TouchableOpacity>
-              </View>
-
-              {/* ini tabsnya */}
-              <View style={styles.tabs}>
-                <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-                  <Text style={styles.activeTabText}>Discuss</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.tab}>
-                  <Text style={styles.tabText}>Session</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* ini discussion tab */}
-              <View style={styles.discussContainer}>
-                <View style={styles.discussHeader}>
-                  <Text style={styles.discussTitle}>DISCUSS</Text>
-                  <TouchableOpacity>
-                    <AntDesign name="pluscircleo" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-                {forumPosts.map(post => (
-                  <PostCard key={post.id} post={post} />
-                ))}
-              </View>
-            </ScrollView>
+export default function ForumPage() {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <ScrollView>
+          {/* ini header */}
+          <View style={styles.header}>
+            <TouchableOpacity>
+              <Ionicons name='arrow-back' size={24} color='black' />
+            </TouchableOpacity>
           </View>
-        </SafeAreaView>
-    )
+
+          {/* ini tabsnya */}
+          <View style={styles.tabs}>
+            <TouchableOpacity style={[styles.tab, styles.activeTab]}>
+              <Text style={styles.activeTabText}>Discuss</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.tab}>
+              <Text style={styles.tabText}>Session</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ini discussion tab */}
+          <View style={styles.discussContainer}>
+            <View style={styles.discussHeader}>
+              <Text style={styles.discussTitle}>DISCUSS</Text>
+              <TouchableOpacity>
+                <AntDesign name="pluscircleo" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+            {forumPosts.map(post => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 20,
     marginBottom: 20,
-    position: 'sticky', // ini biar gak gerak gmn sik aku coba 1-1 g bisa
+    // position: 'sticky', // Not supported in React Native
   },
   tabs: {
     flexDirection: 'row',
@@ -154,10 +154,11 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   postCard: {
-    borderColor: '#49250D', // ini knp g bisa yak kgk muncul bordernya
+    borderColor: '#49250D',
     borderRadius: 15,
     padding: 15,
     marginBottom: 15,
+    // borderWidth moved to component for clarity
   },
   postAuthor: {
     fontWeight: 'bold',
@@ -167,4 +168,4 @@ const styles = StyleSheet.create({
   postQuestion: {
     color: 'black',
   },
-})
+});
