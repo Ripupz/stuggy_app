@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useScore } from './lib/utils/userCourses'; // adjust path if needed
 
 const dates = [
   { date: '24', day: 'M' },
@@ -13,6 +14,13 @@ const dates = [
 ];
 
 export default function HomePage() {
+  const { userCourses } = useScore();
+
+  const allScores = userCourses.flatMap(c => c.scoreData.map(sd => sd.score));
+  const averageScore = allScores.length
+    ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2)
+    : '--';
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Welcome */}
@@ -63,7 +71,7 @@ export default function HomePage() {
           <View style={styles.titleScoreBox}>
             <Text style={styles.sectionTitle}>Score</Text>
           </View>
-          <Text style={styles.scoreValue}>3.80</Text>
+          <Text style={styles.scoreValue}>{averageScore}</Text>
         </TouchableOpacity>
       </View>
 

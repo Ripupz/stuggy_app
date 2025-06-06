@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from "react";
 import { Button, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import { useScore } from './lib/utils/userCourses'; // adjust path if needed
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -9,7 +10,7 @@ type ScoreEntry = { semester: string; score: number };
 type Course = { id: string; name: string; scoreData: ScoreEntry[] };
 
 const GoalsStat = () => {
-  const [userCourses, setUserCourses] = useState<Course[]>([]);
+  const { userCourses, setUserCourses } = useScore();
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
   const [showScoreInput, setShowScoreInput] = useState(false);
