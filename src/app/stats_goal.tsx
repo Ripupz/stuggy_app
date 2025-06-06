@@ -2,7 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from "react";
 import { Button, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import { useScore } from './lib/utils/userCourses'; // adjust path if needed
+import { useScore } from '../lib/utils/userCourses'; // adjust path if needed
 
 const screenWidth = Dimensions.get("window").width;
 
