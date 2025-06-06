@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const dates = [
   { date: '24', day: 'M' },
@@ -54,12 +55,16 @@ export default function HomePage() {
           <Text style={styles.listItem}>• Meeting</Text>
         </View>
 
-        <View style={styles.scoreBox}>
+        <TouchableOpacity
+          style={styles.scoreBox}
+          activeOpacity={0.7}
+          onPress={() => router.push('/stats_goal')}
+        >
           <View style={styles.titleScoreBox}>
-          <Text style={styles.sectionTitle}>Score</Text>
+            <Text style={styles.sectionTitle}>Score</Text>
           </View>
           <Text style={styles.scoreValue}>3.80</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Forum */}
