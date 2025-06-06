@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ModeSwitcher from '../lib/utils/ModeSwitcher';
 import BottomNavBar from '../lib/utils/navbar';
+import TaskInput from '../lib/utils/TaskInput';
 import Timer from '../lib/utils/Timer';
-import TaskInput from './TaskInput';
 
 export default function App() {
   const [isRunning, setIsRunning] = useState(false);
