@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons'; // ✅ Use Expo's vector icons
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import BottomNavBar from '../lib/utils/navbar';
 
 const dates = [
   { date: '24', day: 'M' },
@@ -81,20 +81,7 @@ export default function HomePage() {
       </ScrollView>
 
       {/* Bottom Navigation Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity>
-          <Ionicons name="home" size={26} color="#49250D" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="chatbubble-ellipses-outline" size={26} color="#49250D" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/pomodoro')}> {/* 👈 Navigate to Pomodoro */}
-          <Ionicons name="timer-outline" size={26} color="#49250D" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="stats-chart-outline" size={26} color="#49250D" />
-        </TouchableOpacity>
-      </View>
+      <BottomNavBar active="home" />
     </View>
   );
 }

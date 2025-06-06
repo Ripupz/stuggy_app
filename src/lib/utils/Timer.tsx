@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 type TimerProps = {
   isRunning: boolean;
@@ -9,7 +9,7 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
   const [seconds, setSeconds] = useState(25 * 60);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: number;
 
     if (isRunning) {
       interval = setInterval(() => {
@@ -36,7 +36,7 @@ const Timer: React.FC<TimerProps> = ({ isRunning }) => {
 
 const styles = StyleSheet.create({
   timerText: {
-    fontSize: 68,
+    fontSize: 65,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 65,

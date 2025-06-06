@@ -1,25 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface Props {
   active: 'home' | 'chat' | 'timer' | 'stats';
-  onNavigate?: (page: string) => void;
 }
 
-const BottomNavBar: React.FC<Props> = ({ active, onNavigate }) => {
+const BottomNavBar: React.FC<Props> = ({ active }) => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => onNavigate?.('homepage')}>
+      <TouchableOpacity onPress={() => router.push('/homepage')}>
         <Ionicons name="home" size={26} color={active === 'home' ? '#49250D' : '#888'} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => onNavigate?.('chat')}>
+      <TouchableOpacity onPress={() => router.push('/')}>
         <Ionicons name="chatbubble-ellipses-outline" size={26} color={active === 'chat' ? '#49250D' : '#888'} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => onNavigate?.('pomodoro')}>
+      <TouchableOpacity onPress={() => router.push('/pomodoro')}>
         <Ionicons name="timer-outline" size={26} color={active === 'timer' ? '#49250D' : '#888'} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => onNavigate?.('stats')}>
+      <TouchableOpacity onPress={() => router.push('/')}>
         <Ionicons name="stats-chart-outline" size={26} color={active === 'stats' ? '#49250D' : '#888'} />
       </TouchableOpacity>
     </View>
