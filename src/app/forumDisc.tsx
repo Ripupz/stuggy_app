@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -40,7 +42,7 @@ const forumPosts = [
     id: '5',
     author: 'Vale',
     question:
-      'which programming language that will suit the best for beginners?',
+      'anyone got notes for Data Structure lecture?',
     color: '#FFD6D6',
   },
 ];
@@ -56,8 +58,43 @@ const PostCard = ({ post }: { post: typeof forumPosts[0] }) => {
 };
 
 export default function ForumPage() {
+  const [popUpVisible, setPopUpVisible] = useState(false);
+
   return (
     <SafeAreaView style={styles.container}>
+      <Modal animationType='slide' transparent={true} visible={popUpVisible}
+        onRequestClose={() => {
+          setPopUpVisible(!popUpVisible);
+        }}
+      >
+        <View style={styles.popUpCenteredView}>
+          <View style={styles.popUpView}>
+            {/* Back button */}
+            <TouchableOpacity onPress={() => setPopUpVisible(!popUpVisible)}
+            >
+              <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+            <View style={styles.popUpHeader}>
+              <Text style={styles.captionTitle}>caption</Text>
+              {/* Caption Input */}
+              <TextInput
+                style={styles.captionInput}
+                placeholder="write your caption!"
+                multiline
+              />
+            </View>            
+            
+            {/* Post Button */}
+            <TouchableOpacity 
+             style={styles.postButton}
+             onPress={() => setPopUpVisible(!popUpVisible)} // Closes modal for now
+            >
+              <Text style={styles.postButtonText}>POST</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+      </Modal>
       <View style={styles.content}>
         <ScrollView>
           {/* ini header */}
@@ -70,7 +107,7 @@ export default function ForumPage() {
           {/* ini tabsnya */}
           <View style={styles.tabs}>
             <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-              <Text style={styles.activeTabText}>Discuss</Text>
+              <Text style={styles.activeTabText}>Discussion</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.tab}>
               <Text style={styles.tabText}>Session</Text>
@@ -80,8 +117,8 @@ export default function ForumPage() {
           {/* ini discussion tab */}
           <View style={styles.discussContainer}>
             <View style={styles.discussHeader}>
-              <Text style={styles.discussTitle}>DISCUSS</Text>
-              <TouchableOpacity>
+              <Text style={styles.discussTitle}>DISCUSSION</Text>
+              <TouchableOpacity onPress={() => setPopUpVisible(true)}>
                 <AntDesign name="pluscircleo" size={24} color="black" />
               </TouchableOpacity>
             </View>
@@ -107,7 +144,6 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: 20,
     marginBottom: 20,
-    // position: 'sticky', // Not supported in React Native
   },
   tabs: {
     flexDirection: 'row',
@@ -158,7 +194,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 15,
     marginBottom: 15,
-    // borderWidth moved to component for clarity
   },
   postAuthor: {
     fontWeight: 'bold',
@@ -167,5 +202,56 @@ const styles = StyleSheet.create({
   },
   postQuestion: {
     color: 'black',
+  },
+
+  // pop up post discuss
+  popUpCenteredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  popUpView: {
+    width: '90%',
+    height: 'auto',
+    backgroundColor: '#F7F1E5',
+    borderRadius: 20,
+    padding: 25,
+  },
+  popUpHeader: {
+    top: 20,
+    marginBottom: 40,
+    // display: 'flex',
+    // flexDirection: 'column'
+  },
+  captionTitle: {
+    fontWeight: 'bold',
+    alignSelf: 'flex-start',
+    marginLeft: 5,
+    marginBottom: 5,
+    color: 'black',
+    fontSize: 16,
+  },
+  captionInput: {
+    width: '100%',
+    height: 150,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 15,
+    textAlignVertical: 'top',
+    fontSize: 16,
+    marginBottom: 30,
+  },
+  postButton: {
+    backgroundColor: 'black',
+    borderRadius: 20,
+    paddingVertical: 15,
+    width: '100%',
+    alignItems: 'center',
+  },
+  postButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
