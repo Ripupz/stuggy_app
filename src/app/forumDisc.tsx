@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  GestureResponderEvent,
   Modal,
   ScrollView,
   StyleSheet,
@@ -12,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const forumPosts = [
+const dummyForumPosts = [
   {
     id: '1',
     author: 'Jeni',
@@ -47,10 +49,16 @@ const forumPosts = [
   },
 ];
 
-// Fix: Accept post as a prop
-const PostCard = ({ post }: { post: typeof forumPosts[0] }) => {
+type Post = {
+  id: string;
+  author: string;
+  question: string;
+  color: string;
+};
+
+const PostCard = ({ post }: { post: Post }) => {
   return (
-    <View style={[styles.postCard, { backgroundColor: post.color, borderWidth: 1.5 }]}>
+    <View style={[styles.postCard, { backgroundColor: post.color }]}>
       <Text style={styles.postAuthor}>{post.author}</Text>
       <Text style={styles.postQuestion}>{post.question}</Text>
     </View>
@@ -59,6 +67,38 @@ const PostCard = ({ post }: { post: typeof forumPosts[0] }) => {
 
 export default function ForumPage() {
   const [popUpVisible, setPopUpVisible] = useState(false);
+  const [posts, setPosts] = useState(dummyForumPosts);
+  const [caption, setCaption] = useState('');
+
+  const addDiscuss = (event: GestureResponderEvent) => {
+    console.log('add post pressed');
+    setPopUpVisible(true)
+  };
+
+  const handlePost = () => {
+    
+    // Prevent posting empty captions // mau pake ini tapi gak bisa idk why
+    // if (caption.trim() === '') {
+    //   return;
+    // }
+    console.log('post pressed');
+
+    // Create a new post object
+    const newPost = {
+      id: Date.now().toString(), // Use timestamp for a unique ID
+      author: 'You', // Assuming the current user is posting
+      question: caption,
+      // Cycle through colors for new posts
+      color: ['#FFD6D6', '#D6FFD6', '#D6F5FF', '#EAD6FF'][posts.length % 4],
+    };
+
+    // Add the new post to the beginning of the posts array
+    setPosts([newPost, ...posts]);
+    // Clear the caption input
+    setCaption('');
+    // Close the modal
+    setPopUpVisible(false);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,13 +121,15 @@ export default function ForumPage() {
                 style={styles.captionInput}
                 placeholder="write your caption!"
                 multiline
+                value={caption}
+                onChangeText={setCaption}
               />
             </View>            
             
             {/* Post Button */}
             <TouchableOpacity 
              style={styles.postButton}
-             onPress={() => setPopUpVisible(!popUpVisible)} // Closes modal for now
+             onPress={handlePost} // Closes modal for now
             >
               <Text style={styles.postButtonText}>POST</Text>
             </TouchableOpacity>
@@ -99,7 +141,7 @@ export default function ForumPage() {
         <ScrollView>
           {/* ini header */}
           <View style={styles.header}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/homepage')}>
               <Ionicons name='arrow-back' size={24} color='black' />
             </TouchableOpacity>
           </View>
@@ -118,11 +160,11 @@ export default function ForumPage() {
           <View style={styles.discussContainer}>
             <View style={styles.discussHeader}>
               <Text style={styles.discussTitle}>DISCUSSION</Text>
-              <TouchableOpacity onPress={() => setPopUpVisible(true)}>
+              <TouchableOpacity onPress={addDiscuss}>
                 <AntDesign name="pluscircleo" size={24} color="black" />
               </TouchableOpacity>
             </View>
-            {forumPosts.map(post => (
+            {posts.map(post => (
               <PostCard key={post.id} post={post} />
             ))}
           </View>
@@ -190,6 +232,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   postCard: {
+    borderWidth: 1.5,
     borderColor: '#49250D',
     borderRadius: 15,
     padding: 15,
