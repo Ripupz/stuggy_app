@@ -45,10 +45,13 @@ export default function HomePage() {
         {/* Calendar */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
           {dates.map((item, index) => (
-            <View
-              key={index}
-              style={[styles.dateBox, item.selected && styles.selectedDateBox]}
-            >
+          <TouchableOpacity
+            key={index}
+            /* style={[styles.dateBox, item.selected && styles.selectedDateBox]}*/
+            onPress={() => router.push('/calendar')}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.dateBox, item.selected && styles.selectedDateBox]}>
               <Text style={[styles.dateText, item.selected && styles.selectedText]}>
                 {item.date}
               </Text>
@@ -56,6 +59,8 @@ export default function HomePage() {
                 {item.day}
               </Text>
             </View>
+          </TouchableOpacity>
+
           ))}
         </ScrollView>
 
@@ -254,3 +259,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 });
+   
+
+
