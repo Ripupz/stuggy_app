@@ -1,5 +1,8 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, GestureResponderEvent, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import BottomNavBar from '../lib/utils/navbar';
+import { useScore } from '../lib/utils/userCourses';
 
 const dates = [
   { date: '24', day: 'M' },
@@ -12,71 +15,91 @@ const dates = [
 ];
 
 export default function HomePage() {
+  const { userCourses } = useScore();
+  const router = useRouter();
+
+  const allScores = userCourses.flatMap(c => c.scoreData.map(sd => sd.score));
+  const averageScore = allScores.length
+    ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2)
+    : '--';
+
+  const forum = (event: GestureResponderEvent) => {
+    console.log('Forum pressed');
+    router.push('/forumDisc')
+  };
+  
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Welcome */}
-      <Image
-        source={require('../../assets/images/FrogHome.png')}
-        style={styles.frogImage}
-        resizeMode="contain"
-      />
-      <Text style={styles.welcomeText}>Welcome Back,</Text>
-      <Text style={styles.nameText}>
-        Valen <Text style={styles.emoji}>👋</Text>
-      </Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Welcome */}
+        <Image
+          source={require('../../assets/images/FrogHome.png')}
+          style={styles.frogImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.welcomeText}>Welcome Back,</Text>
+        <Text style={styles.nameText}>
+          Valen <Text style={styles.emoji}>👋</Text>
+        </Text>
 
-      {/* Calendar */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
-        {dates.map((item, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dateBox,
-              item.selected && styles.selectedDateBox,
-            ]}
+        {/* Calendar */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
+          {dates.map((item, index) => (
+            <View
+              key={index}
+              style={[styles.dateBox, item.selected && styles.selectedDateBox]}
+            >
+              <Text style={[styles.dateText, item.selected && styles.selectedText]}>
+                {item.date}
+              </Text>
+              <Text style={[styles.dayText, item.selected && styles.selectedText]}>
+                {item.day}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Today's List & Score */}
+        <View style={styles.row}>
+          <View style={styles.todoBox}>
+            <Text style={styles.sectionTitle}>Today's list</Text>
+            <Text style={styles.listItem}>• Make Agenda</Text>
+            <Text style={styles.listItem}>• Study Calculus</Text>
+            <Text style={styles.listItem}>• Meeting</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.scoreBox}
+            activeOpacity={0.7}
+            onPress={() => router.push('/stats_goal')}
           >
-            <Text style={[styles.dateText, item.selected && styles.selectedText]}>
-              {item.date}
-            </Text>
-            <Text style={[styles.dayText, item.selected && styles.selectedText]}>
-              {item.day}
-            </Text>
+            <View style={styles.titleScoreBox}>
+              <Text style={styles.sectionTitle}>Score</Text>
+            </View>
+            <Text style={styles.scoreValue}>{averageScore}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Forum */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => router.push('/forumDisc')}
+        >
+          <View style={styles.forumBox}>
+            <Text style={styles.sectionTitle}>FORUM</Text>
+            <View style={styles.messageBox}>
+              <Text style={styles.userName}>Jeni</Text>
+              <Text>Is there anyone who wants to join a study session</Text>
+            </View>
+            <View style={styles.messageBox}>
+              <Text style={styles.userName}>Syau</Text>
+              <Text>Any tips on how to stay consistent with your study plan...?</Text>
+            </View>
           </View>
-        ))}
+        </TouchableOpacity>
       </ScrollView>
-
-      {/* Today's List & Score */}
-      <View style={styles.row}>
-        <View style={styles.todoBox}>
-          <Text style={styles.sectionTitle}>Today's list</Text>
-          <Text style={styles.listItem}>• Make Agenda</Text>
-          <Text style={styles.listItem}>• Study Calculus</Text>
-          <Text style={styles.listItem}>• Meeting</Text>
-        </View>
-
-        <View style={styles.scoreBox}>
-          <View style={styles.titleScoreBox}>
-          <Text style={styles.sectionTitle}>Score</Text>
-          </View>
-          <Text style={styles.scoreValue}>3.80</Text>
-        </View>
-      </View>
-
-      {/* Forum */}
-      <View style={styles.forumBox}>
-        <Text style={styles.sectionTitle}>FORUM</Text>
-
-        <View style={styles.messageBox}>
-          <Text style={styles.userName}>Jeni</Text>
-          <Text>Is there anyone who wants to join a study session</Text>
-        </View>
-
-        <View style={styles.messageBox}>
-          <Text style={styles.userName}>Syau</Text>
-          <Text>Any tips on how to stay consistent with your study plan...?</Text>
-        </View>
-      </View>
-    </ScrollView>
+      <BottomNavBar active="home" />
+    </View>
   );
 }
 
@@ -165,7 +188,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: 170,
-    height: 150, 
+    height: 150,
   },
   titleScoreBox: {
     width: '100%',
@@ -207,6 +230,27 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 4.5,
+  },
+  navBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 95,
+    backgroundColor: '#fdfaf5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 10,
+    paddingBottom: 10,
   },
 });
