@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  BackHandler,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -36,6 +37,22 @@ export default function Login() {
       setErrorMessage(err.message);
     }
   };
+
+  useEffect(() => {
+    const backAction = () => {
+      // Navigate to index page when back button pressed on LoginScreen
+      router.push('/');  // Adjust path if needed
+
+      return true; // We handled it, prevent default
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

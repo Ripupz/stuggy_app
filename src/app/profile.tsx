@@ -31,6 +31,9 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
+  
+  
+
   return (
     <View style={styles.container}>
       {/* Back Button */}
@@ -67,7 +70,12 @@ export default function Profile() {
         </TouchableOpacity>
       </View>
       <View style={styles.card}>
-        <TouchableOpacity style={styles.actionRow} onPress={() => {/* handle logout */}}>
+        <TouchableOpacity style={styles.actionRow} 
+        onPress={async () => {
+            await supabase.auth.signOut();
+            router.replace('/login'); 
+          }}
+        >
           <AntDesign name="logout" size={20} color="#C0392B" />
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>

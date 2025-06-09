@@ -45,7 +45,7 @@ export default function ForumPage() {
       .order('created_at', { ascending: false });
     if (!error && data) {
       setPosts(data as Post[]);
-      console.log('Fetched posts:', data); // <-- Add this line
+      // console.log('Fetched posts:', data); // <-- Add this line
     }
     setLoading(false);
   };

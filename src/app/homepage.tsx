@@ -2,6 +2,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  BackHandler,
   Dimensions,
   GestureResponderEvent,
   Image,
@@ -9,7 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import { useEventStore } from "../lib/utils/eventStore";
 import BottomNavBar from '../lib/utils/navbar';
@@ -77,6 +78,21 @@ export default function HomePage() {
     };
     fetchUsername();
   }, []);
+
+  useEffect(() => {
+  const backAction = () => {
+    // Return true to say "I've handled it" and prevent default behavior (going back)
+    // Return false to let the default back action happen
+    return true; 
+  };
+
+  const backHandler = BackHandler.addEventListener(
+    'hardwareBackPress',
+    backAction
+  );
+
+  return () => backHandler.remove(); // Clean up listener when component unmounts
+}, []);
 
   useEffect(() => {
     const fetchForumPosts = async () => {
