@@ -12,7 +12,7 @@ type EventData = {
   date: string;
   priority: string;
 };
-type EventsMap = { [date: string]: EventData[] };
+type EventsByDate ={ [date: string]: EventData[] };
 
 const priorities = ["urgent", "less urgent", "important", "less important"];
 
