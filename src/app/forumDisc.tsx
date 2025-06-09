@@ -1,7 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   GestureResponderEvent,
   Modal,
@@ -13,41 +11,7 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const dummyForumPosts = [
-  {
-    id: '1',
-    author: 'Jeni',
-    question: 'Is there anyone who knows how to solve this question? Pls help.',
-    color: '#FFD6D6',
-  },
-  {
-    id: '2',
-    author: 'Syau',
-    question: 'Any tips on how to stay consistent with your study plan...?',
-    color: '#D6FFD6',
-  },
-  {
-    id: '3',
-    author: 'Rapi',
-    question: 'Is there any source to learn coding?',
-    color: '#D6F5FF',
-  },
-  {
-    id: '4',
-    author: 'Key',
-    question:
-      'which programming language that will suit the best for beginners?',
-    color: '#EAD6FF',
-  },
-  {
-    id: '5',
-    author: 'Vale',
-    question:
-      'anyone got notes for Data Structure lecture?',
-    color: '#FFD6D6',
-  },
-];
+import supabase from '../lib/utils/supabase'; // adjust path if needed
 
 type Post = {
   id: string;
@@ -56,64 +20,95 @@ type Post = {
   color: string;
 };
 
-const PostCard = ({ post }: { post: Post }) => {
-  return (
-    <View style={[styles.postCard, { backgroundColor: post.color }]}>
-      <Text style={styles.postAuthor}>{post.author}</Text>
-      <Text style={styles.postQuestion}>{post.question}</Text>
-    </View>
-  );
-};
+const PostCard = ({ post }: { post: Post }) => (
+  <View style={[styles.postCard, { backgroundColor: post.color }]}>
+    <Text style={styles.postAuthor}>{post.author}</Text>
+    <Text style={styles.postQuestion}>{post.question}</Text>
+  </View>
+);
 
 export default function ForumPage() {
   const [popUpVisible, setPopUpVisible] = useState(false);
-  const [posts, setPosts] = useState(dummyForumPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [caption, setCaption] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const addDiscuss = (event: GestureResponderEvent) => {
-    console.log('add post pressed');
-    setPopUpVisible(true)
+  // Fetch posts from Supabase
+  const fetchPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('forum_posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error && data) {
+      setPosts(data as Post[]);
+      console.log('Fetched posts:', data); // <-- Add this line
+    }
+    setLoading(false);
   };
 
-  const handlePost = () => {
-    
-    // Prevent posting empty captions // mau pake ini tapi gak bisa idk why
-    // if (caption.trim() === '') {
-    //   return;
-    // }
-    console.log('post pressed');
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-    // Create a new post object
-    const newPost = {
-      id: Date.now().toString(), // Use timestamp for a unique ID
-      author: 'You', // Assuming the current user is posting
-      question: caption,
-      // Cycle through colors for new posts
-      color: ['#FFD6D6', '#D6FFD6', '#D6F5FF', '#EAD6FF'][posts.length % 4],
-    };
+  const addDiscuss = (event: GestureResponderEvent) => {
+    setPopUpVisible(true);
+  };
 
-    // Add the new post to the beginning of the posts array
-    setPosts([newPost, ...posts]);
-    // Clear the caption input
+  const handlePost = async () => {
+    if (caption.trim() === '') return;
+
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert('You must be logged in to post.');
+      return;
+    }
+
+    // Get username from user metadata or fetch from users_data table
+    let username = user.user_metadata?.username;
+    if (!username) {
+      // fallback: fetch from users_data table using email
+      const { data: userData } = await supabase
+        .from('users_data')
+        .select('username')
+        .eq('email', user.email)
+        .single();
+      username = userData?.username;
+    }
+
+    if (!username) {
+      alert('Username not found.');
+      return;
+    }
+
+    const colorArr = ['#FFD6D6', '#D6FFD6', '#D6F5FF', '#EAD6FF'];
+    const color = colorArr[posts.length % 4];
+
+    const { error } = await supabase.from('forum_posts').insert([
+      {
+        author: username, // Use the actual username
+        question: caption,
+        color,
+      }
+    ]);
+    if (error) {
+      console.log('Supabase insert error:', error.message);
+      alert('Failed to post: ' + error.message);
+      return;
+    }
     setCaption('');
-    // Close the modal
     setPopUpVisible(false);
+    await fetchPosts();
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Modal animationType='slide' transparent={true} visible={popUpVisible}
-        onRequestClose={() => {
-          setPopUpVisible(!popUpVisible);
-        }}
+        onRequestClose={() => setPopUpVisible(!popUpVisible)}
       >
         <View style={styles.popUpCenteredView}>
           <View style={styles.popUpView}>
-            {/* Back button */}
-            <TouchableOpacity onPress={() => setPopUpVisible(!popUpVisible)}
-            >
-              <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
             <View style={styles.popUpHeader}>
               <Text style={styles.captionTitle}>caption</Text>
               {/* Caption Input */}
@@ -124,29 +119,20 @@ export default function ForumPage() {
                 value={caption}
                 onChangeText={setCaption}
               />
-            </View>            
-            
+            </View>
             {/* Post Button */}
-            <TouchableOpacity 
-             style={styles.postButton}
-             onPress={handlePost} // Closes modal for now
+            <TouchableOpacity
+              style={styles.postButton}
+              onPress={handlePost}
             >
               <Text style={styles.postButtonText}>POST</Text>
             </TouchableOpacity>
           </View>
         </View>
-
       </Modal>
       <View style={styles.content}>
         <ScrollView>
-          {/* ini header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.push('/homepage')}>
-              <Ionicons name='arrow-back' size={24} color='black' />
-            </TouchableOpacity>
-          </View>
-
-          {/* ini tabsnya */}
+          {/* Tabs */}
           <View style={styles.tabs}>
             <TouchableOpacity style={[styles.tab, styles.activeTab]}>
               <Text style={styles.activeTabText}>Discussion</Text>
@@ -155,8 +141,7 @@ export default function ForumPage() {
               <Text style={styles.tabText}>Session</Text>
             </TouchableOpacity>
           </View>
-
-          {/* ini discussion tab */}
+          {/* Discussion tab */}
           <View style={styles.discussContainer}>
             <View style={styles.discussHeader}>
               <Text style={styles.discussTitle}>DISCUSSION</Text>
@@ -164,9 +149,13 @@ export default function ForumPage() {
                 <AntDesign name="pluscircleo" size={24} color="black" />
               </TouchableOpacity>
             </View>
-            {posts.map(post => (
-              <PostCard key={post.id} post={post} />
-            ))}
+            {loading ? (
+              <Text>Loading...</Text>
+            ) : (
+              posts.map(post => (
+                <PostCard key={post.id} post={post} />
+              ))
+            )}
           </View>
         </ScrollView>
       </View>
