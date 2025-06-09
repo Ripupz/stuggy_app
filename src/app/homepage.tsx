@@ -92,6 +92,21 @@ export default function HomePage() {
     fetchForumPosts();
   }, []);
 
+  const [userId, setUserId] = useState<string | null>(null);
+
+
+  useEffect(() => {
+  if (!userId) return;
+  const fetchEvents = async () => {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('user_id', userId);
+    if (!error && data) setEvents(groupEventsByDate(data));
+  };
+  fetchEvents();
+}, [userId]);
+
     const averageScore = allScores.length
     ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2)
     : '--';
@@ -213,6 +228,15 @@ export default function HomePage() {
       <BottomNavBar active="home" />
     </View>
   );
+}
+
+function groupEventsByDate(events: EventData[]): Record<string, EventData[]> {
+  const grouped: Record<string, EventData[]> = {};
+  events.forEach((ev) => {
+    if (!grouped[ev.date]) grouped[ev.date] = [];
+    grouped[ev.date].push(ev);
+  });
+  return grouped;
 }
 
 const screenWidth = Dimensions.get('window').width;

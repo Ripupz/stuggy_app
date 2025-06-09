@@ -1,10 +1,12 @@
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import BottomNavBar from '../lib/utils/navbar';
+import supabase from '../lib/utils/supabase';
 
 type EventData = {
+  id?: string;
   title: string;
   time: string;
   date: string;
@@ -24,7 +26,7 @@ function toLocalDateString(date: Date) {
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [events, setEvents] = useState<EventsMap>({});
+  const [events, setEvents] = useState<Record<string, EventData[]>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [formData, setFormData] = useState<EventData>({
@@ -67,16 +69,27 @@ export default function CalendarPage() {
 
   const handleEditEvent = (index: number) => {
     if (!selectedDate) return;
-    const data = events[selectedDate.toDateString()][index];
+    const dateKey = selectedDate.toDateString();
+    const data = events[dateKey][index];
     setFormData({ ...data });
     setEditIndex(index);
-    setOriginalDateKey(selectedDate.toDateString());
+    setOriginalDateKey(dateKey);
     setIsModalOpen(true);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newDateKey = new Date(formData.date).toDateString();
     const updated = { ...events };
+
+    if (editIndex !== null && originalDateKey !== null) {
+      const eventId = events[originalDateKey][editIndex].id;
+      await supabase.from('events').update({
+        title: formData.title,
+        date: formData.date,
+        time: formData.time,
+        priority: formData.priority,
+      }).eq('id', eventId);
+    }
 
     if (editIndex !== null && originalDateKey) {
       if (originalDateKey !== newDateKey) {
@@ -100,11 +113,51 @@ export default function CalendarPage() {
     setIsModalOpen(false);
     setEditIndex(null);
     setOriginalDateKey(null);
+
+    if (editIndex !== null && originalDateKey !== null) {
+      const eventId = events[originalDateKey][editIndex].id;
+      await supabase.from('events').update({
+        title: formData.title,
+        date: formData.date,
+        time: formData.time,
+        priority: formData.priority,
+      }).eq('id', eventId);
+    }
+
+    // Save to Supabase
+    if (editIndex === null) {
+      await supabase.from('events').insert([
+        {
+          // user_id: userId, // add if you have user auth
+          title: formData.title,
+          date: formData.date,
+          time: formData.time,
+          priority: formData.priority,
+        }
+      ]);
+    } else {
+      // For edit, update the event in Supabase (you need to store event id in your data)
+      const eventId = events[originalDateKey!][editIndex].id;
+      await supabase.from('events').update({
+        title: formData.title,
+        date: formData.date,
+        time: formData.time,
+        priority: formData.priority,
+      }).eq('id', eventId);
+    }
+
+    // Optionally re-fetch events from Supabase here
   };
 
-  const handleRemoveEvent = (idx: number) => {
+  
+
+  const handleRemoveEvent = async (idx: number) => {
     if (!selectedDate) return;
     const dateKey = selectedDate.toDateString();
+    const eventId = events[dateKey][idx].id;
+    await supabase.from('events').delete().eq('id', eventId);
+
+    // Update local state as before
     const updated = { ...events };
     updated[dateKey].splice(idx, 1);
     if (updated[dateKey].length === 0) {
@@ -119,6 +172,31 @@ export default function CalendarPage() {
     setCurrentMonth(newMonth);
     setSelectedDate(null);
   };
+
+  useEffect(() => {
+  const fetchEvents = async () => {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*');
+      // .eq('user_id', userId); // Uncomment if needed
+
+    if (error) {
+      console.error('Error fetching events:', error.message);
+      return;
+    }
+
+    if (data) {
+      const grouped: EventsByDate = {};
+      data.forEach(ev => {
+        if (!grouped[ev.date]) grouped[ev.date] = [];
+        grouped[ev.date].push(ev);
+      });
+      setEvents(grouped);
+    }
+  };
+
+  fetchEvents();
+}, []);
 
   return (
     <View style={{ flex: 1 }}>
