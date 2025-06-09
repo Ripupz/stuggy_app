@@ -24,7 +24,7 @@ export default function HomePage() {
     : '--';
 
   const forum = (event: GestureResponderEvent) => {
-    console.log('Forum pressed');
+    console.log('forum pressed');
     router.push('/forumDisc')
   };
   
@@ -83,7 +83,7 @@ export default function HomePage() {
         {/* Forum */}
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => router.push('/forumDisc')}
+          onPress={forum}
         >
           <View style={styles.forumBox}>
             <Text style={styles.sectionTitle}>FORUM</Text>
