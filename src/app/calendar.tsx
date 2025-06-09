@@ -45,11 +45,13 @@ export default function CalendarPage() {
   };
 
   const handleAddEvent = () => {
-    if (!selectedDate) return;
-    setFormData({ title: "", time: "", date: selectedDate.toISOString().split('T')[0], priority: "" });
-    setEditIndex(null);
-    setIsModalOpen(true);
-  };
+    const dateToUse = selectedDate ?? new Date();  // gunakan tanggal hari ini jika belum dipilih
+     setSelectedDate(dateToUse);
+     setFormData({ title: "", time: "", date: dateToUse.toISOString().split('T')[0], priority: "" });
+     setEditIndex(null);
+     setIsModalOpen(true);
+    };
+
 
   const handleEditEvent = (index: number) => {
     if (!selectedDate) return;
@@ -131,21 +133,39 @@ export default function CalendarPage() {
       {/* CALENDAR DATES */}
       <View style={styles.dates}>
         {calendarDates.map((date, idx) => {
-          const isToday = date?.toDateString() === new Date().toDateString();
-          const isSelected = selectedDate && date?.toDateString() === selectedDate.toDateString();
+          const dateKey = date?.toDateString();
+          const isToday = dateKey === new Date().toDateString();
+          const isSelected = selectedDate && dateKey === selectedDate.toDateString();
+          const hasEvents = dateKey && events[dateKey] && events[dateKey].length > 0;
+
           return (
             <TouchableOpacity
               key={idx}
               onPress={() => date && handleDateClick(date)}
-              style={[styles.date, isSelected && styles.selectedDate, isToday && styles.todayDate]}
+              style={[
+                styles.date,
+                isSelected && styles.selectedDate,
+                isToday && styles.todayDate,
+                hasEvents && styles.hasEventDate,
+              ]}
             >
-              <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
+              <Text
+                style={[
+                  styles.dateText,
+                  isSelected && styles.selectedDateText,
+                  hasEvents && styles.hasEventText,
+                ]}
+              >
                 {date ? date.getDate() : ""}
               </Text>
+              {hasEvents && (
+                <View style={styles.eventDot} />
+              )}
             </TouchableOpacity>
           );
         })}
       </View>
+
 
       {/* EVENTS LIST */}
       {selectedDate && (
@@ -156,8 +176,10 @@ export default function CalendarPage() {
           {events[selectedDate.toDateString()]?.map((ev, idx) => (
             <View key={idx} style={styles.eventItem}>
               <View style={styles.eventHeader}>
-                <Text style={styles.eventTime}>{ev.time}</Text>
-                <Text style={styles.eventPriority}>{ev.priority}</Text>
+                <View style={styles.eventTimePriority}>
+                  <Text style={styles.eventTime}>{ev.time}</Text>
+                  <Text style={styles.eventPriority}>{ev.priority}</Text>
+                </View>
                 <TouchableOpacity onPress={() => handleEditEvent(idx)}>
                   <Text style={styles.editButton}>✏️</Text>
                 </TouchableOpacity>
@@ -260,6 +282,7 @@ const styles = StyleSheet.create({
   monthNavButton: {
     fontSize: 30,
     color: "#3a1f0f",
+     marginHorizontal: 15,
   },
   monthName: {
     fontWeight: "bold",
@@ -334,12 +357,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 14,
   },
+  eventTimePriority: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+  },
   eventPriority: {
-    padding: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 8,
     backgroundColor: "#e9dfc9",
     fontSize: 12,
+    color: "#3a1f0f",
   },
+
   editButton: {
     color: "#3a1f0f",
     fontSize: 16,

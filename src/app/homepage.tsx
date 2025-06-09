@@ -1,33 +1,65 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, GestureResponderEvent, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEventStore } from "../lib/utils/eventStore";
+import {
+  Dimensions,
+  GestureResponderEvent,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import BottomNavBar from '../lib/utils/navbar';
 import { useScore } from '../lib/utils/userCourses';
 
-const dates = [
-  { date: '24', day: 'M' },
-  { date: '25', day: 'T' },
-  { date: '26', day: 'W', selected: true },
-  { date: '27', day: 'T' },
-  { date: '28', day: 'F' },
-  { date: '01', day: 'S' },
-  { date: '02', day: 'S' },
-];
+
+function generateWeekDates() {
+  const today = new Date();
+  const dates = [];
+
+  const currentDayIndex = today.getDay(); // Sunday = 0
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((currentDayIndex + 6) % 7)); // shift to Monday
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+
+    const isToday =
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+
+    dates.push({
+      date: date.getDate().toString().padStart(2, '0'),
+      day: date.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0), // 'M', 'T', etc
+      isToday,
+    });
+  }
+
+  return dates;
+}
+
+const dates = generateWeekDates();
 
 export default function HomePage() {
   const { userCourses } = useScore();
   const router = useRouter();
 
-  const allScores = userCourses.flatMap(c => c.scoreData.map(sd => sd.score));
+  const { events, setEvents } = useEventStore();
+
+  const allScores = userCourses.flatMap((c) => c.scoreData.map((sd) => sd.score));
   const averageScore = allScores.length
     ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2)
     : '--';
 
   const forum = (event: GestureResponderEvent) => {
     console.log('Forum pressed');
-    router.push('/forumDisc')
+    router.push('/forumDisc');
   };
-  
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -45,33 +77,56 @@ export default function HomePage() {
         {/* Calendar */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
           {dates.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            /* style={[styles.dateBox, item.selected && styles.selectedDateBox]}*/
-            onPress={() => router.push('/calendar')}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.dateBox, item.selected && styles.selectedDateBox]}>
-              <Text style={[styles.dateText, item.selected && styles.selectedText]}>
-                {item.date}
-              </Text>
-              <Text style={[styles.dayText, item.selected && styles.selectedText]}>
-                {item.day}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
+            <TouchableOpacity
+              key={index}
+              onPress={() => router.push('/calendar')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.dateBox, item.isToday && styles.todayBox]}>
+                <Text style={[styles.dateText, item.isToday && styles.todayText]}>{item.date}</Text>
+                <Text style={[styles.dayText, item.isToday && styles.todayText]}>{item.day}</Text>
+              </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
 
-        {/* Today's List & Score */}
-        <View style={styles.row}>
-          <View style={styles.todoBox}>
-            <Text style={styles.sectionTitle}>Today's list</Text>
-            <Text style={styles.listItem}>• Make Agenda</Text>
-            <Text style={styles.listItem}>• Study Calculus</Text>
-            <Text style={styles.listItem}>• Meeting</Text>
-          </View>
+        {/* Upcoming List & Score */}
+        <View style={styles.roww}>
+        <View style={styles.todoBox}>
+          <Text style={styles.sectionTitle}>Upcoming list</Text>
+          {(() => {
+            const today = new Date();
+            const sevenDaysLater = new Date();
+            sevenDaysLater.setDate(today.getDate() + 7);
+
+            const upcomingEvents: EventData[] = [];
+
+            Object.entries(events).forEach(([dateStr, evts]) => {
+              const date = new Date(dateStr);
+              if (date >= today && date <= sevenDaysLater) {
+                evts.forEach((e) => upcomingEvents.push({ ...e, date: dateStr }));
+              }
+            });
+
+            const sorted = upcomingEvents.sort((a, b) => {
+              const aDate = new Date(`${a.date}T${a.time}`);
+              const bDate = new Date(`${b.date}T${b.time}`);
+              return aDate.getTime() - bDate.getTime();
+            });
+
+            const limited = sorted.slice(0, 5);
+
+            return limited.length > 0 ? (
+              limited.map((event, idx) => (
+                <Text key={idx} style={styles.listItem}>
+                  • {event.time} – {event.title}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No upcoming events</Text>
+            );
+          })()}
+        </View>
 
           <TouchableOpacity
             style={styles.scoreBox}
@@ -86,18 +141,15 @@ export default function HomePage() {
         </View>
 
         {/* Forum */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => router.push('/forumDisc')}
-        >
+        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/forumDisc')}>
           <View style={styles.forumBox}>
             <Text style={styles.sectionTitle}>FORUM</Text>
             <View style={styles.messageBox}>
-              <Text style={styles.userName}>Jeni</Text>
+              <Text className={styles.userName}>Jeni</Text>
               <Text>Is there anyone who wants to join a study session</Text>
             </View>
             <View style={styles.messageBox}>
-              <Text style={styles.userName}>Syau</Text>
+              <Text className={styles.userName}>Syau</Text>
               <Text>Any tips on how to stay consistent with your study plan...?</Text>
             </View>
           </View>
@@ -150,8 +202,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selectedDateBox: {
-    backgroundColor: '#E0B2BE',
+  todayBox: {
+    backgroundColor: '#ddb8c1',
   },
   dateText: {
     fontWeight: 'bold',
@@ -162,9 +214,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#49250D',
   },
-  selectedText: {
+  todayText: {
     color: '#49250D',
+    fontWeight: 'bold',
   },
+  roww: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  gap: 16,
+  marginTop: 24,
+},
+
   row: {
     flexDirection: 'row',
     marginTop: 24,
@@ -259,6 +319,3 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 });
-   
-
-
