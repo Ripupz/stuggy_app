@@ -148,7 +148,7 @@ export default function ForumPage() {
             <TouchableOpacity style={[styles.tab, styles.activeTab]}>
               <Text style={styles.activeTabText}>Discussion</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.tab}>
+            <TouchableOpacity style={styles.tab} onPress={() => router.push('./forumSes')}>
               <Text style={styles.tabText}>Session</Text>
             </TouchableOpacity>
           </View>
