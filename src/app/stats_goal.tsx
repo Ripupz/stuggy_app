@@ -1,4 +1,4 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from "react";
 import { Button, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -150,6 +150,14 @@ const GoalsStat = () => {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Back Button styled like profile page */}
+      <TouchableOpacity
+        style={styles.backBtn}
+        onPress={() => router.push('/homepage')}
+      >
+        <AntDesign name="arrowleft" size={28} color="#7B5A36" />
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <Text style={styles.title}>Your Courses</Text>
         {userCourses.length === 0 && (
@@ -505,5 +513,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#49250D",
     marginTop: 2,
+  },
+  backBtn: {
+    marginLeft: 18,
+    marginTop: 50,
+    marginBottom: 0,
+    alignSelf: 'flex-start',
   },
 });

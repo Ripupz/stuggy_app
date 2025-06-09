@@ -1,3 +1,4 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -12,6 +13,13 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backBtn}
+        onPress={() => router.push('/homepage')}
+      >
+        <AntDesign name="arrowleft" size={28} color="#7B5A36" />
+      </TouchableOpacity>
       <View style={styles.timerContainer}>
         <Timer isRunning={isRunning} />
         <ModeSwitcher />
@@ -65,5 +73,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     letterSpacing: 2,
+  },
+  backBtn: {
+    marginLeft: 18,
+    marginTop: 40,
+    marginBottom: 20,
+    alignSelf: 'flex-start',
   },
 });

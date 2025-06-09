@@ -1,7 +1,9 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, GestureResponderEvent, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BottomNavBar from '../lib/utils/navbar';
+import supabase from '../lib/utils/supabase';
 import { useScore } from '../lib/utils/userCourses';
 
 const dates = [
@@ -17,6 +19,22 @@ const dates = [
 export default function HomePage() {
   const { userCourses } = useScore();
   const router = useRouter();
+
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data, error } = await supabase
+        .from('users_data')
+        .select('username')
+        .eq('email', user.email)
+        .single();
+      if (!error && data) setUsername(data.username);
+    };
+    fetchUsername();
+  }, []);
 
   const allScores = userCourses.flatMap(c => c.scoreData.map(sd => sd.score));
   const averageScore = allScores.length
@@ -37,10 +55,17 @@ export default function HomePage() {
           style={styles.frogImage}
           resizeMode="contain"
         />
-        <Text style={styles.welcomeText}>Welcome Back,</Text>
-        <Text style={styles.nameText}>
-          Valen <Text style={styles.emoji}>👋</Text>
-        </Text>
+        <View style={styles.welcomeRow}>
+          <View>
+            <Text style={styles.welcomeText}>Welcome Back,</Text>
+            <Text style={styles.nameText}>
+              {username ? username : '...'} <Text style={styles.emoji}>👋</Text>
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => router.push('/profile')}>
+            <MaterialIcons name="account-circle" size={44} color="#49250D" />
+          </TouchableOpacity>
+        </View>
 
         {/* Calendar */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
@@ -252,5 +277,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 10,
     paddingBottom: 10,
+  },
+  welcomeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: -40,
   },
 });

@@ -1,4 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   GestureResponderEvent,
@@ -11,7 +12,9 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import supabase from '../lib/utils/supabase'; // adjust path if needed
+import BottomNavBar from '../lib/utils/navbar'; // Adjust the import based on your file structure
+import supabase from '../lib/utils/supabase';
+
 
 type Post = {
   id: string;
@@ -102,8 +105,16 @@ export default function ForumPage() {
     await fetchPosts();
   };
 
+  const router = useRouter()
   return (
     <SafeAreaView style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backBtn}
+        onPress={() => { router.push('/homepage'); }}
+      >
+        <AntDesign name="arrowleft" size={28} color="#7B5A36" />
+      </TouchableOpacity>
       <Modal animationType='slide' transparent={true} visible={popUpVisible}
         onRequestClose={() => setPopUpVisible(!popUpVisible)}
       >
@@ -159,6 +170,7 @@ export default function ForumPage() {
           </View>
         </ScrollView>
       </View>
+      <BottomNavBar active="chat" />
     </SafeAreaView>
   );
 }
@@ -285,5 +297,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  backBtn: {
+    marginLeft: 18,
+    marginTop: 30,
+    marginBottom: 20,
+    alignSelf: 'flex-start',
   },
 });

@@ -5,7 +5,7 @@ import { ScoreProvider } from "../lib/utils/userCourses"; // adjust path as need
 export default function RootLayout() {
   return (
     <ScoreProvider>
-      <Stack />
+      <Stack screenOptions={{ headerShown: false }} />
     </ScoreProvider>
   );
 }
