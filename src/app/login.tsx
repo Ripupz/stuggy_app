@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -12,14 +12,29 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import supabase from '../lib/utils/supabase'; // <-- adjust path if needed
 
 export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const router = useRouter();
 
-  const router = useRouter(); // <-- Get the router instance
-
-  const Homepage = () => {
-    console.log('homepage pressed');
-    router.push('/homepage');
+  const handleLogin = async () => {
+    setErrorMessage('');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) {
+        setErrorMessage(error.message);
+      } else {
+        router.replace('/homepage');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
   };
 
   return (
@@ -43,11 +58,15 @@ export default function Login() {
             />
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>email / username</Text>
+              <Text style={styles.label}>email</Text>
               <TextInput
                 style={styles.input}
-                placeholder="enter your email / username"
+                placeholder="enter your email"
                 placeholderTextColor="#aaa"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
               />
             </View>
 
@@ -58,10 +77,16 @@ export default function Login() {
                 placeholder="enter your password"
                 secureTextEntry
                 placeholderTextColor="#aaa"
+                value={password}
+                onChangeText={setPassword}
               />
             </View>
 
-            <TouchableOpacity style={styles.loginButton} onPress={Homepage}>
+            {errorMessage ? (
+              <Text style={{ color: 'red', marginTop: 10 }}>{errorMessage}</Text>
+            ) : null}
+
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>

@@ -454,4 +454,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  hasEventDate: {
+    borderColor: '#DED193',
+    borderWidth: 2,
+  },
+  hasEventText: {
+    color: '#DED193',
+  },
+  eventDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#DED193',
+    marginTop: 2,
+  },
 });

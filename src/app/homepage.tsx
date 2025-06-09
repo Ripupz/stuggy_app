@@ -1,6 +1,6 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { useEventStore } from "../lib/utils/eventStore";
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   GestureResponderEvent,
@@ -11,8 +11,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useEventStore } from "../lib/utils/eventStore";
 import BottomNavBar from '../lib/utils/navbar';
+import supabase from '../lib/utils/supabase';
 import { useScore } from '../lib/utils/userCourses';
+
+type EventData = {
+  title: string;
+  time: string;
+  date: string;
+  priority: string;
+};
 
 
 function generateWeekDates() {
@@ -51,7 +60,39 @@ export default function HomePage() {
   const { events, setEvents } = useEventStore();
 
   const allScores = userCourses.flatMap((c) => c.scoreData.map((sd) => sd.score));
-  const averageScore = allScores.length
+  const [username, setUsername] = useState<string | null>(null);
+  const [forumPosts, setForumPosts] = useState<{ id: string; author: string; question: string; color: string }[]>([]);
+  const [forumLoading, setForumLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data, error } = await supabase
+        .from('users_data')
+        .select('username')
+        .eq('email', user.email)
+        .single();
+      if (!error && data) setUsername(data.username);
+    };
+    fetchUsername();
+  }, []);
+
+  useEffect(() => {
+    const fetchForumPosts = async () => {
+      setForumLoading(true);
+      const { data, error } = await supabase
+        .from('forum_posts')
+        .select('id, author, question, color')
+        .order('created_at', { ascending: false })
+        .limit(2); // Show the latest 2 posts
+      if (!error && data) setForumPosts(data);
+      setForumLoading(false);
+    };
+    fetchForumPosts();
+  }, []);
+
+    const averageScore = allScores.length
     ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2)
     : '--';
 
@@ -69,10 +110,17 @@ export default function HomePage() {
           style={styles.frogImage}
           resizeMode="contain"
         />
-        <Text style={styles.welcomeText}>Welcome Back,</Text>
-        <Text style={styles.nameText}>
-          Valen <Text style={styles.emoji}>👋</Text>
-        </Text>
+        <View style={styles.welcomeRow}>
+          <View>
+            <Text style={styles.welcomeText}>Welcome Back,</Text>
+            <Text style={styles.nameText}>
+              {username ? username : '...'} <Text style={styles.emoji}>👋</Text>
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => router.push('/profile')}>
+            <MaterialIcons name="account-circle" size={44} color="#49250D" />
+          </TouchableOpacity>
+        </View>
 
         {/* Calendar */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarContainer}>
@@ -141,17 +189,24 @@ export default function HomePage() {
         </View>
 
         {/* Forum */}
-        <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/forumDisc')}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={forum}
+        >
           <View style={styles.forumBox}>
             <Text style={styles.sectionTitle}>FORUM</Text>
-            <View style={styles.messageBox}>
-              <Text className={styles.userName}>Jeni</Text>
-              <Text>Is there anyone who wants to join a study session</Text>
-            </View>
-            <View style={styles.messageBox}>
-              <Text className={styles.userName}>Syau</Text>
-              <Text>Any tips on how to stay consistent with your study plan...?</Text>
-            </View>
+            {forumLoading ? (
+              <Text>Loading...</Text>
+            ) : forumPosts.length === 0 ? (
+              <Text style={{ color: '#888' }}>No posts yet.</Text>
+            ) : (
+              forumPosts.map(post => (
+                <View key={post.id} style={[styles.messageBox, { backgroundColor: post.color || '#BEE9E8' }]}>
+                  <Text style={styles.userName}>{post.author}</Text>
+                  <Text>{post.question}</Text>
+                </View>
+              ))
+            )}
           </View>
         </TouchableOpacity>
       </ScrollView>
@@ -318,4 +373,18 @@ const styles = StyleSheet.create({
     elevation: 10,
     paddingBottom: 10,
   },
+  welcomeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: -40,
+  },
+  emptyText: {
+    color: '#888',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 10,
+  },
 });
+

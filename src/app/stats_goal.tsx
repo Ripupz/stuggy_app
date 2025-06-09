@@ -1,7 +1,9 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from "react";
 import { Button, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import BottomNavBar from '../lib/utils/navbar'; // adjust the path if needed
 import { useScore } from '../lib/utils/userCourses'; // adjust path if needed
 
 const screenWidth = Dimensions.get("window").width;
@@ -10,6 +12,7 @@ type ScoreEntry = { semester: string; score: number };
 type Course = { id: string; name: string; scoreData: ScoreEntry[] };
 
 const GoalsStat = () => {
+  const router = useRouter();
   const { userCourses, setUserCourses } = useScore();
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
@@ -146,77 +149,147 @@ const GoalsStat = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text style={styles.title}>Your Courses</Text>
-      {userCourses.length === 0 && (
-        <Text style={styles.placeholderText}>add your Courses!</Text>
-      )}
-      <FlatList
-        data={userCourses}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={{ flexDirection: "row", alignItems: "center", marginRight: 20 }}>
-            <TouchableOpacity
-              style={[
-                styles.courseItem,
-                item.id === selectedCourseId && styles.selectedCourse,
-                { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }
-              ]}
-              onPress={() => setSelectedCourseId(item.id)}
-              activeOpacity={0.7}
-            >
-              <Text style={{ color: item.id === selectedCourseId ? "#fff" : "#49250D" }}>
-                {item.name}
-              </Text>
-              <TouchableOpacity
-                onPress={() => handleEditCourse(item)}
-                style={{ padding: 8 }}
-              >
-                <MaterialIcons name="more-vert" size={18} color="#FFFFFF" />
-              </TouchableOpacity>
-            </TouchableOpacity>
-            {menuVisibleId === item.id && (
-              <View style={styles.menuBox}>
-                <TouchableOpacity
-                  onPress={() => {
-                    handleEditCourse(item);
-                    setMenuVisibleId(null);
-                  }}
-                  style={styles.menuItem}
-                >
-                  <Text>Edit Scores</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleRemoveCourse(item.id)}
-                  style={styles.menuItem}
-                >
-                  <Text style={{ color: "#B4656F" }}>Remove Course</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        )}
-        style={{ marginLeft: 20, marginBottom: 20 }}
-        scrollEnabled={false}
-      />
+    <View style={{ flex: 1 }}>
+      {/* Back Button styled like profile page */}
       <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => {
-          setModalVisible(true);
-          setShowScoreInput(false);
-          setCourseName("");
-          setScoreInputs([{ semester: "Sem 1", score: "" }]);
-          setEditMode(false);
-        }}
+        style={styles.backBtn}
+        onPress={() => router.push('/homepage')}
       >
-        <Text style={styles.addButtonText}>+ Add Course</Text>
+        <AntDesign name="arrowleft" size={28} color="#7B5A36" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Score Progress</Text>
-      {selectedCourse ? (
-        selectedCourse.scoreData.length > 0 ? (
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+        <Text style={styles.title}>Your Courses</Text>
+        {userCourses.length === 0 && (
+          <Text style={styles.placeholderText}>add your Courses!</Text>
+        )}
+        <FlatList
+          data={userCourses}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={{ flexDirection: "row", alignItems: "center", marginRight: 20 }}>
+              <TouchableOpacity
+                style={[
+                  styles.courseItem,
+                  item.id === selectedCourseId && styles.selectedCourse,
+                  { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }
+                ]}
+                onPress={() => setSelectedCourseId(item.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ color: item.id === selectedCourseId ? "#fff" : "#49250D" }}>
+                  {item.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => handleEditCourse(item)}
+                  style={{ padding: 8 }}
+                >
+                  <MaterialIcons name="more-vert" size={18} color="#FFFFFF" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+              {menuVisibleId === item.id && (
+                <View style={styles.menuBox}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleEditCourse(item);
+                      setMenuVisibleId(null);
+                    }}
+                    style={styles.menuItem}
+                  >
+                    <Text>Edit Scores</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveCourse(item.id)}
+                    style={styles.menuItem}
+                  >
+                    <Text style={{ color: "#B4656F" }}>Remove Course</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
+          style={{ marginLeft: 20, marginBottom: 20 }}
+          scrollEnabled={false}
+        />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            setModalVisible(true);
+            setShowScoreInput(false);
+            setCourseName("");
+            setScoreInputs([{ semester: "Sem 1", score: "" }]);
+            setEditMode(false);
+          }}
+        >
+          <Text style={styles.addButtonText}>+ Add Course</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Score Progress</Text>
+        {selectedCourse ? (
+          selectedCourse.scoreData.length > 0 ? (
+            <LineChart
+              data={chartData}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              style={{ marginLeft: 20, borderRadius: 16 }}
+            />
+          ) : (
+            <Text style={styles.placeholderText}>
+              Add score data to see your progress!
+            </Text>
+          )
+        ) : (
+          <Text style={styles.placeholderText}>
+            Select a course to see its score progress!
+          </Text>
+        )}
+
+        <Text style={styles.title}>Average Score per Semester</Text>
+        {userCourses.length > 0 && userCourses.some(c => c.scoreData.length > 0) ? (
           <LineChart
-            data={chartData}
+            data={{
+              labels: (() => {
+                // Collect all unique semesters
+                const allSems = userCourses.reduce((acc, course) => {
+                  course.scoreData.forEach(sd => {
+                    if (!acc.includes(sd.semester)) acc.push(sd.semester);
+                  });
+                  return acc;
+                }, [] as string[]);
+                // Sort semesters numerically if possible
+                return allSems.sort((a, b) => {
+                  const anum = parseInt(a.replace(/\D/g, ""));
+                  const bnum = parseInt(b.replace(/\D/g, ""));
+                  return anum - bnum;
+                });
+              })(),
+              datasets: [
+                {
+                  data: (() => {
+                    const allSems = userCourses.reduce((acc, course) => {
+                      course.scoreData.forEach(sd => {
+                        if (!acc.includes(sd.semester)) acc.push(sd.semester);
+                      });
+                      return acc;
+                    }, [] as string[]);
+                    return allSems.sort((a, b) => {
+                      const anum = parseInt(a.replace(/\D/g, ""));
+                      const bnum = parseInt(b.replace(/\D/g, ""));
+                      return anum - bnum;
+                    }).map(sem => {
+                      // Average score for this semester across all courses
+                      const scores = userCourses
+                        .map(c => c.scoreData.find(sd => sd.semester === sem)?.score)
+                        .filter(score => score !== undefined) as number[];
+                      if (scores.length === 0) return 0;
+                      return scores.reduce((a, b) => a + b, 0) / scores.length;
+                    });
+                  })(),
+                  strokeWidth: 2,
+                },
+              ],
+            }}
             width={screenWidth - 40}
             height={220}
             chartConfig={chartConfig}
@@ -224,154 +297,95 @@ const GoalsStat = () => {
           />
         ) : (
           <Text style={styles.placeholderText}>
-            Add score data to see your progress!
+            Add scores to see the average per semester!
           </Text>
-        )
-      ) : (
-        <Text style={styles.placeholderText}>
-          Select a course to see its score progress!
-        </Text>
-      )}
+        )}
 
-      <Text style={styles.title}>Average Score per Semester</Text>
-      {userCourses.length > 0 && userCourses.some(c => c.scoreData.length > 0) ? (
-        <LineChart
-          data={{
-            labels: (() => {
-              // Collect all unique semesters
-              const allSems = userCourses.reduce((acc, course) => {
-                course.scoreData.forEach(sd => {
-                  if (!acc.includes(sd.semester)) acc.push(sd.semester);
-                });
-                return acc;
-              }, [] as string[]);
-              // Sort semesters numerically if possible
-              return allSems.sort((a, b) => {
-                const anum = parseInt(a.replace(/\D/g, ""));
-                const bnum = parseInt(b.replace(/\D/g, ""));
-                return anum - bnum;
-              });
-            })(),
-            datasets: [
-              {
-                data: (() => {
-                  const allSems = userCourses.reduce((acc, course) => {
-                    course.scoreData.forEach(sd => {
-                      if (!acc.includes(sd.semester)) acc.push(sd.semester);
-                    });
-                    return acc;
-                  }, [] as string[]);
-                  return allSems.sort((a, b) => {
-                    const anum = parseInt(a.replace(/\D/g, ""));
-                    const bnum = parseInt(b.replace(/\D/g, ""));
-                    return anum - bnum;
-                  }).map(sem => {
-                    // Average score for this semester across all courses
-                    const scores = userCourses
-                      .map(c => c.scoreData.find(sd => sd.semester === sem)?.score)
-                      .filter(score => score !== undefined) as number[];
-                    if (scores.length === 0) return 0;
-                    return scores.reduce((a, b) => a + b, 0) / scores.length;
-                  });
-                })(),
-                strokeWidth: 2,
-              },
-            ],
+        <Modal
+          visible={modalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => {
+            setModalVisible(false);
+            setShowScoreInput(false);
+            setCourseName("");
+            setScoreInputs([{ semester: "Sem 1", score: "" }]);
+            setEditMode(false);
           }}
-          width={screenWidth - 40}
-          height={220}
-          chartConfig={chartConfig}
-          style={{ marginLeft: 20, borderRadius: 16 }}
-        />
-      ) : (
-        <Text style={styles.placeholderText}>
-          Add scores to see the average per semester!
-        </Text>
-      )}
-
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => {
-          setModalVisible(false);
-          setShowScoreInput(false);
-          setCourseName("");
-          setScoreInputs([{ semester: "Sem 1", score: "" }]);
-          setEditMode(false);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {!showScoreInput ? (
-              <>
-                <Text style={styles.modalTitle}>Add Course</Text>
-                <TextInput
-                  placeholder="Course Name"
-                  value={courseName}
-                  onChangeText={setCourseName}
-                  style={styles.input}
-                />
-                <Button title="Next" onPress={handleAddCourse} />
-              </>
-            ) : (
-              <>
-                <View style={{ flexDirection: "row", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
-                  <Text style={styles.modalTitle}>{editMode ? "Edit Scores" : "Add Your Scores!"}</Text>
-                  {editMode && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        if (selectedCourseId) handleRemoveCourse(selectedCourseId);
-                      }}
-                      style={{ marginLeft: 10, backgroundColor: "#B4656F", padding: 8, borderRadius: 8 }}
-                    >
-                      <Text style={{ color: "#fff", fontWeight: "bold" }}>Remove Course</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-                <ScrollView style={{ width: "100%" }}>
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              {!showScoreInput ? (
+                <>
+                  <Text style={styles.modalTitle}>Add Course</Text>
                   <TextInput
                     placeholder="Course Name"
                     value={courseName}
                     onChangeText={setCourseName}
                     style={styles.input}
                   />
-                  {scoreInputs.map((input, idx) => (
-                    <View key={input.semester} style={{ marginBottom: 12 }}>
-                      <Text style={{ fontSize: 16, marginBottom: 4 }}>{input.semester}</Text>
-                      <TextInput
-                        placeholder="Score"
-                        value={input.score}
-                        onChangeText={(val) => handleScoreChange(idx, val)}
-                        style={styles.input}
-                        keyboardType="numeric"
-                      />
-                    </View>
-                  ))}
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    <TouchableOpacity
-                      style={styles.addSemButton}
-                      onPress={handleAddSemesterInput}
-                    >
-                      <Text style={styles.addSemButtonText}>+ Add Semester</Text>
-                    </TouchableOpacity>
-                    {scoreInputs.length > 1 && (
+                  <Button title="Next" onPress={handleAddCourse} />
+                </>
+              ) : (
+                <>
+                  <View style={{ flexDirection: "row", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <Text style={styles.modalTitle}>{editMode ? "Edit Scores" : "Add Your Scores!"}</Text>
+                    {editMode && (
                       <TouchableOpacity
-                        style={[styles.addSemButton, { backgroundColor: "#B4656F" }]}
-                        onPress={handleRemoveSemesterInput}
+                        onPress={() => {
+                          if (selectedCourseId) handleRemoveCourse(selectedCourseId);
+                        }}
+                        style={{ marginLeft: 10, backgroundColor: "#B4656F", padding: 8, borderRadius: 8 }}
                       >
-                        <Text style={[styles.addSemButtonText, { color: "#fff" }]}>- Remove Semester</Text>
+                        <Text style={{ color: "#fff", fontWeight: "bold" }}>Remove Course</Text>
                       </TouchableOpacity>
                     )}
                   </View>
-                  <Button title="Save Scores" onPress={handleSaveScores} />
-                </ScrollView>
-              </>
-            )}
+                  <ScrollView style={{ width: "100%" }}>
+                    <TextInput
+                      placeholder="Course Name"
+                      value={courseName}
+                      onChangeText={setCourseName}
+                      style={styles.input}
+                    />
+                    {scoreInputs.map((input, idx) => (
+                      <View key={input.semester} style={{ marginBottom: 12 }}>
+                        <Text style={{ fontSize: 16, marginBottom: 4 }}>{input.semester}</Text>
+                        <TextInput
+                          placeholder="Score"
+                          value={input.score}
+                          onChangeText={(val) => handleScoreChange(idx, val)}
+                          style={styles.input}
+                          keyboardType="numeric"
+                        />
+                      </View>
+                    ))}
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <TouchableOpacity
+                        style={styles.addSemButton}
+                        onPress={handleAddSemesterInput}
+                      >
+                        <Text style={styles.addSemButtonText}>+ Add Semester</Text>
+                      </TouchableOpacity>
+                      {scoreInputs.length > 1 && (
+                        <TouchableOpacity
+                          style={[styles.addSemButton, { backgroundColor: "#B4656F" }]}
+                          onPress={handleRemoveSemesterInput}
+                        >
+                          <Text style={[styles.addSemButtonText, { color: "#fff" }]}>- Remove Semester</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    <Button title="Save Scores" onPress={handleSaveScores} />
+                  </ScrollView>
+                </>
+              )}
+            </View>
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        </Modal>
+      </ScrollView>
+      <BottomNavBar active="stats" />
+    </View>
   );
 };
 
@@ -477,5 +491,33 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
     color: "#ffff",
+  },
+  navbar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#f3e9e2",
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 100,
+  },
+  navItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  navText: {
+    fontSize: 12,
+    color: "#49250D",
+    marginTop: 2,
+  },
+  backBtn: {
+    marginLeft: 18,
+    marginTop: 50,
+    marginBottom: 0,
+    alignSelf: 'flex-start',
   },
 });

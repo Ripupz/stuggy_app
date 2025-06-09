@@ -2,6 +2,7 @@ import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import {
+  Dimensions,
   GestureResponderEvent,
   Image,
   KeyboardAvoidingView,
@@ -9,8 +10,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  Dimensions
+  TouchableOpacity
 } from "react-native";
 
 export default function Index() {
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   task: {
     color: '#dd4a48',
-    fontWeight: '600',
+    fontWeight: '500',
     fontFamily: 'TaskFont',
     textDecorationLine: 'underline'
   },
