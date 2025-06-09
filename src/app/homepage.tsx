@@ -21,6 +21,8 @@ export default function HomePage() {
   const router = useRouter();
 
   const [username, setUsername] = useState<string | null>(null);
+  const [forumPosts, setForumPosts] = useState<{ id: string; author: string; question: string; color: string }[]>([]);
+  const [forumLoading, setForumLoading] = useState(true);
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -34,6 +36,20 @@ export default function HomePage() {
       if (!error && data) setUsername(data.username);
     };
     fetchUsername();
+  }, []);
+
+  useEffect(() => {
+    const fetchForumPosts = async () => {
+      setForumLoading(true);
+      const { data, error } = await supabase
+        .from('forum_posts')
+        .select('id, author, question, color')
+        .order('created_at', { ascending: false })
+        .limit(2); // Show the latest 2 posts
+      if (!error && data) setForumPosts(data);
+      setForumLoading(false);
+    };
+    fetchForumPosts();
   }, []);
 
   const allScores = userCourses.flatMap(c => c.scoreData.map(sd => sd.score));
@@ -112,14 +128,18 @@ export default function HomePage() {
         >
           <View style={styles.forumBox}>
             <Text style={styles.sectionTitle}>FORUM</Text>
-            <View style={styles.messageBox}>
-              <Text style={styles.userName}>Jeni</Text>
-              <Text>Is there anyone who wants to join a study session</Text>
-            </View>
-            <View style={styles.messageBox}>
-              <Text style={styles.userName}>Syau</Text>
-              <Text>Any tips on how to stay consistent with your study plan...?</Text>
-            </View>
+            {forumLoading ? (
+              <Text>Loading...</Text>
+            ) : forumPosts.length === 0 ? (
+              <Text style={{ color: '#888' }}>No posts yet.</Text>
+            ) : (
+              forumPosts.map(post => (
+                <View key={post.id} style={[styles.messageBox, { backgroundColor: post.color || '#BEE9E8' }]}>
+                  <Text style={styles.userName}>{post.author}</Text>
+                  <Text>{post.question}</Text>
+                </View>
+              ))
+            )}
           </View>
         </TouchableOpacity>
       </ScrollView>

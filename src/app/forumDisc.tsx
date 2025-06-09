@@ -68,29 +68,28 @@ export default function ForumPage() {
       return;
     }
 
-    // Get username from user metadata or fetch from users_data table
-    let username = user.user_metadata?.username;
-    if (!username) {
-      // fallback: fetch from users_data table using email
-      const { data: userData } = await supabase
-        .from('users_data')
-        .select('username')
-        .eq('email', user.email)
-        .single();
-      username = userData?.username;
-    }
+    // Always fetch username from users_data table using email
+    const { data: userData } = await supabase
+      .from('users_data')
+      .select('username')
+      .eq('email', user.email)
+      .single();
+
+    const username = userData?.username;
 
     if (!username) {
       alert('Username not found.');
       return;
     }
 
+    console.log('Posting as username:', username);
+
     const colorArr = ['#FFD6D6', '#D6FFD6', '#D6F5FF', '#EAD6FF'];
     const color = colorArr[posts.length % 4];
 
     const { error } = await supabase.from('forum_posts').insert([
       {
-        author: username, // Use the actual username
+        author: username, 
         question: caption,
         color,
       }
