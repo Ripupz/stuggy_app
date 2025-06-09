@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useNavigation, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -17,6 +17,20 @@ export default function Pomodoro() {
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<'Pomodoro' | 'Short break' | 'Long break'>('Pomodoro');
   const router = useRouter();
+  const navigation = useNavigation();
+
+  // Prevent leaving the page while timer is running
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (isRunning) {
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+        // Optionally show a warning
+        alert('You cannot leave the Pomodoro page while the timer is running!');
+      }
+    });
+    return unsubscribe;
+  }, [navigation, isRunning]);
 
   return (
     <SafeAreaView style={styles.container}>
