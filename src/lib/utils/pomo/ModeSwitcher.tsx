@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-const modes = ['Pomodoro', 'Short break', 'Long break'];
+const modes: Array<'Pomodoro' | 'Short break' | 'Long break'> = [
+  'Pomodoro',
+  'Short break',
+  'Long break',
+];
 
-const ModeSwitcher = () => {
-  const [active, setActive] = useState('Pomodoro');
 
+type Props = {
+  activeMode: 'Pomodoro' | 'Short break' | 'Long break';
+  setMode: (mode: 'Pomodoro' | 'Short break' | 'Long break') => void;
+};
+
+const ModeSwitcher: React.FC<Props> = ({ activeMode, setMode }) => {
   return (
     <View style={styles.container}>
       {modes.map((mode) => (
-        <TouchableOpacity key={mode} onPress={() => setActive(mode)}>
-          <Text style={[styles.text, active === mode && styles.active]}>
+        <TouchableOpacity key={mode} onPress={() => setMode(mode)}>
+          <Text style={[styles.text, activeMode === mode && styles.active]}>
             {mode}
           </Text>
         </TouchableOpacity>
@@ -18,6 +26,7 @@ const ModeSwitcher = () => {
     </View>
   );
 };
+
 
 export default ModeSwitcher;
 

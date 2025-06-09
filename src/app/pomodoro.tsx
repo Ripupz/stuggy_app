@@ -1,25 +1,37 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import BottomNavBar from '../lib/utils/navbar';
 import ModeSwitcher from '../lib/utils/pomo/ModeSwitcher';
-import TaskInput from '../lib/utils/pomo/TaskInput';
+import TaskManager from '../lib/utils/pomo/TaskManager';
 import Timer from '../lib/utils/pomo/Timer';
 
-export default function App() {
+export default function Pomodoro() {
   const [isRunning, setIsRunning] = useState(false);
+  const [mode, setMode] = useState<'Pomodoro' | 'Short break' | 'Long break'>('Pomodoro');
   const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.timerContainer}>
-        <Timer isRunning={isRunning} />
-        <ModeSwitcher />
-      </View>
-      <TaskInput />
-      <TouchableOpacity style={styles.startButton} onPress={() => setIsRunning(true)}>
-        <Text style={styles.startText}>START</Text>
-      </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.timerContainer}>
+          <Timer isRunning={isRunning} mode={mode} onModeChange={setMode} />
+          <ModeSwitcher activeMode={mode} setMode={setMode} />
+        </View>
+
+        <TaskManager />
+
+        <TouchableOpacity style={styles.startButton} onPress={() => setIsRunning(prev => !prev)}>
+          <Text style={styles.startText}>{isRunning ? 'STOP' : 'START'}</Text>
+        </TouchableOpacity>
+      </ScrollView>
       <BottomNavBar active="timer" />
     </SafeAreaView>
   );
@@ -29,14 +41,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fefcf5',
-    paddingVertical:20,
-    padding: 0,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#888',
-    marginBottom: 10,
+  scrollContainer: {
+    paddingVertical: 20,
+    paddingBottom: 100, // extra space so bottom button isn't hidden
   },
   timerContainer: {
     backgroundColor: '#fefcf5',
@@ -47,7 +55,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
     marginBottom: 20,
-    height: '50%',
     width: '100%',
   },
   startButton: {
@@ -55,10 +62,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderRadius: 40,
     alignItems: 'center',
-    padding: 30,
-    marginTop: 120,
+    marginTop: 20,
     width: '70%',
-    marginLeft: '15%',
+    alignSelf: 'center',
   },
   startText: {
     color: 'white',
