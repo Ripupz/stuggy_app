@@ -144,22 +144,22 @@ export default function ForumPage() {
       <View style={styles.content}>
         <ScrollView>
           {/* Tabs */}
-          <View style={styles.tabs}>
+          {/* <View style={styles.tabs}>
             <TouchableOpacity style={[styles.tab, styles.activeTab]}>
               <Text style={styles.activeTabText}>Discussion</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.tab} onPress={() => router.push('./forumSes')}>
               <Text style={styles.tabText}>Session</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
           {/* Discussion tab */}
-          <View style={styles.discussContainer}>
             <View style={styles.discussHeader}>
               <Text style={styles.discussTitle}>DISCUSSION</Text>
               <TouchableOpacity onPress={addDiscuss}>
                 <AntDesign name="pluscircleo" size={24} color="black" />
               </TouchableOpacity>
             </View>
+          <View style={styles.discussContainer}>
             {loading ? (
               <Text>Loading...</Text>
             ) : (
