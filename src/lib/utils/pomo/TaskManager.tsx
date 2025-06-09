@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import TaskInput from './TaskInput';
 import TaskItem from './TaskItem';
 
@@ -37,18 +37,16 @@ const TaskManager = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Tasks</Text>
       <TaskInput onAdd={addTask} />
-      <FlatList
-        contentContainerStyle={styles.taskListContainer}
-        data={tasks}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
+      <View style={styles.taskListContainer}>
+        {tasks.map(item => (
           <TaskItem
+            key={item.id}
             task={item}
             onToggle={() => toggleTask(item.id)}
-            onDelete={() => deleteTask(item.id)} // Pass delete function
+            onDelete={() => deleteTask(item.id)}
           />
-        )}
-      />
+        ))}
+      </View>
     </View>
   );
 };
