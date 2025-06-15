@@ -2,7 +2,7 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from "react";
 import { Button, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { LineChart } from "react-native-chart-kit";
+import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 import BottomNavBar from '../lib/utils/navbar'; // adjust the path if needed
 import { useScore } from '../lib/utils/userCourses'; // adjust path if needed
 
@@ -10,6 +10,113 @@ const screenWidth = Dimensions.get("window").width;
 
 type ScoreEntry = { semester: string; score: number };
 type Course = { id: string; name: string; scoreData: ScoreEntry[] };
+
+// Custom SVG Line Chart Component
+const SVGLineChart = ({ data, width, height }: { data: any; width: number; height: number }) => {
+  if (!data.datasets[0].data.length || data.datasets[0].data.every((d: number) => d === 0)) {
+    return (
+      <View style={{ width, height, backgroundColor: '#fff', borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginLeft: 20 }}>
+        <Text style={{ color: '#888' }}>No data to display</Text>
+      </View>
+    );
+  }
+
+  const padding = 40;
+  const chartWidth = width - (padding * 2);
+  const chartHeight = height - (padding * 2);
+  
+  const maxValue = Math.max(...data.datasets[0].data, 100); // Ensure minimum scale of 100
+  const minValue = Math.min(...data.datasets[0].data, 0);
+  const valueRange = maxValue - minValue || 1;
+  
+  const points = data.datasets[0].data.map((value: number, index: number) => {
+    const x = padding + (index * chartWidth) / (data.datasets[0].data.length - 1 || 1);
+    const y = padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+    return { x, y, value };
+  });
+  
+  const pathData = points.map((point, index) => 
+    `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+  ).join(' ');
+
+  return (
+    <View style={{ backgroundColor: '#fff', borderRadius: 16, marginLeft: 20, padding: 10 }}>
+      <Svg width={width} height={height}>
+        {/* Grid lines */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
+          const y = padding + chartHeight * (1 - ratio);
+          return (
+            <Line
+              key={`grid-${index}`}
+              x1={padding}
+              y1={y}
+              x2={width - padding}
+              y2={y}
+              stroke="#f0f0f0"
+              strokeWidth="1"
+            />
+          );
+        })}
+        
+        {/* Chart line */}
+        <Polyline
+          points={pathData.replace(/[ML]/g, '').trim()}
+          fill="none"
+          stroke="#49250D"
+          strokeWidth="2"
+        />
+        
+        {/* Data points */}
+        {points.map((point, index) => (
+          <Circle
+            key={`point-${index}`}
+            cx={point.x}
+            cy={point.y}
+            r="5"
+            fill="#49250D"
+            stroke="#fff"
+            strokeWidth="2"
+          />
+        ))}
+        
+        {/* Y-axis labels */}
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
+          const y = padding + chartHeight * (1 - ratio);
+          const value = Math.round(minValue + (valueRange * ratio));
+          return (
+            <SvgText
+              key={`y-label-${index}`}
+              x={padding - 10}
+              y={y + 4}
+              fontSize="12"
+              fill="#3A1F0F"
+              textAnchor="end"
+            >
+              {value}
+            </SvgText>
+          );
+        })}
+        
+        {/* X-axis labels */}
+        {data.labels.map((label: string, index: number) => {
+          const x = padding + (index * chartWidth) / (data.labels.length - 1 || 1);
+          return (
+            <SvgText
+              key={`x-label-${index}`}
+              x={x}
+              y={height - 10}
+              fontSize="12"
+              fill="#3A1F0F"
+              textAnchor="middle"
+            >
+              {label}
+            </SvgText>
+          );
+        })}
+      </Svg>
+    </View>
+  );
+};
 
 const GoalsStat = () => {
   const router = useRouter();
@@ -30,7 +137,6 @@ const GoalsStat = () => {
         datasets: [
           {
             data: selectedCourse.scoreData.map((item) => item.score),
-            strokeWidth: 2,
           },
         ],
       }
@@ -38,19 +144,6 @@ const GoalsStat = () => {
         labels: [""],
         datasets: [{ data: [0] }],
       };
-
-  const chartConfig = {
-    backgroundGradientFrom: "#fff",
-    backgroundGradientTo: "#fff",
-    color: (opacity = 1) => `rgba(58, 31, 15, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(58, 31, 15, ${opacity})`,
-    strokeWidth: 2,
-    propsForDots: {
-      r: "5",
-      strokeWidth: "2",
-      stroke: "#49250D",
-    },
-  };
 
   // Add new course
   const handleAddCourse = () => {
@@ -148,6 +241,42 @@ const GoalsStat = () => {
     if (selectedCourseId === courseId) setSelectedCourseId(null);
   };
 
+  // Calculate average scores data
+  const averageScoresData = () => {
+    if (userCourses.length === 0 || !userCourses.some(c => c.scoreData.length > 0)) {
+      return { labels: [""], datasets: [{ data: [0] }] };
+    }
+
+    // Collect all unique semesters
+    const allSems = userCourses.reduce((acc, course) => {
+      course.scoreData.forEach(sd => {
+        if (!acc.includes(sd.semester)) acc.push(sd.semester);
+      });
+      return acc;
+    }, [] as string[]);
+
+    // Sort semesters numerically if possible
+    const sortedSems = allSems.sort((a, b) => {
+      const anum = parseInt(a.replace(/\D/g, ""));
+      const bnum = parseInt(b.replace(/\D/g, ""));
+      return anum - bnum;
+    });
+
+    const averageData = sortedSems.map(sem => {
+      // Average score for this semester across all courses
+      const scores = userCourses
+        .map(c => c.scoreData.find(sd => sd.semester === sem)?.score)
+        .filter(score => score !== undefined) as number[];
+      if (scores.length === 0) return 0;
+      return scores.reduce((a, b) => a + b, 0) / scores.length;
+    });
+
+    return {
+      labels: sortedSems,
+      datasets: [{ data: averageData }],
+    };
+  };
+
   return (
     <View style={{ flex: 1 }}>
       {/* Back Button styled like profile page */}
@@ -184,7 +313,7 @@ const GoalsStat = () => {
                   onPress={() => handleEditCourse(item)}
                   style={{ padding: 8 }}
                 >
-                  <MaterialIcons name="more-vert" size={18} color="#FFFFFF" />
+                  <MaterialIcons name="more-vert" size={18} color={item.id === selectedCourseId ? "#FFFFFF" : "#49250D"} />
                 </TouchableOpacity>
               </TouchableOpacity>
               {menuVisibleId === item.id && (
@@ -227,12 +356,10 @@ const GoalsStat = () => {
         <Text style={styles.title}>Score Progress</Text>
         {selectedCourse ? (
           selectedCourse.scoreData.length > 0 ? (
-            <LineChart
+            <SVGLineChart
               data={chartData}
               width={screenWidth - 40}
               height={220}
-              chartConfig={chartConfig}
-              style={{ marginLeft: 20, borderRadius: 16 }}
             />
           ) : (
             <Text style={styles.placeholderText}>
@@ -247,53 +374,10 @@ const GoalsStat = () => {
 
         <Text style={styles.title}>Average Score per Semester</Text>
         {userCourses.length > 0 && userCourses.some(c => c.scoreData.length > 0) ? (
-          <LineChart
-            data={{
-              labels: (() => {
-                // Collect all unique semesters
-                const allSems = userCourses.reduce((acc, course) => {
-                  course.scoreData.forEach(sd => {
-                    if (!acc.includes(sd.semester)) acc.push(sd.semester);
-                  });
-                  return acc;
-                }, [] as string[]);
-                // Sort semesters numerically if possible
-                return allSems.sort((a, b) => {
-                  const anum = parseInt(a.replace(/\D/g, ""));
-                  const bnum = parseInt(b.replace(/\D/g, ""));
-                  return anum - bnum;
-                });
-              })(),
-              datasets: [
-                {
-                  data: (() => {
-                    const allSems = userCourses.reduce((acc, course) => {
-                      course.scoreData.forEach(sd => {
-                        if (!acc.includes(sd.semester)) acc.push(sd.semester);
-                      });
-                      return acc;
-                    }, [] as string[]);
-                    return allSems.sort((a, b) => {
-                      const anum = parseInt(a.replace(/\D/g, ""));
-                      const bnum = parseInt(b.replace(/\D/g, ""));
-                      return anum - bnum;
-                    }).map(sem => {
-                      // Average score for this semester across all courses
-                      const scores = userCourses
-                        .map(c => c.scoreData.find(sd => sd.semester === sem)?.score)
-                        .filter(score => score !== undefined) as number[];
-                      if (scores.length === 0) return 0;
-                      return scores.reduce((a, b) => a + b, 0) / scores.length;
-                    });
-                  })(),
-                  strokeWidth: 2,
-                },
-              ],
-            }}
+          <SVGLineChart
+            data={averageScoresData()}
             width={screenWidth - 40}
             height={220}
-            chartConfig={chartConfig}
-            style={{ marginLeft: 20, borderRadius: 16 }}
           />
         ) : (
           <Text style={styles.placeholderText}>
