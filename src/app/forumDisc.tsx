@@ -1,4 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -15,26 +16,65 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BottomNavBar from '../lib/utils/navbar'; // Adjust the import based on your file structure
 import supabase from '../lib/utils/supabase';
 
-
 type Post = {
   id: string;
   author: string;
   question: string;
   color: string;
+  created_at?: string;
 };
 
-const PostCard = ({ post }: { post: Post }) => (
-  <View style={[styles.postCard, { backgroundColor: post.color }]}>
-    <Text style={styles.postAuthor}>{post.author}</Text>
-    <Text style={styles.postQuestion}>{post.question}</Text>
-  </View>
-);
+const PostCard = ({ 
+  post, 
+  currentUsername, 
+  onEdit 
+}: { 
+  post: Post; 
+  currentUsername: string | null;
+  onEdit: (post: Post) => void;
+}) => {
+  const isOwner = currentUsername === post.author;
+
+  return (
+    <View style={[styles.postCard, { backgroundColor: post.color }]}>
+      <View style={styles.postHeader}>
+        <Text style={styles.postAuthor}>{post.author}</Text>
+        {isOwner && (
+          <TouchableOpacity
+            onPress={() => onEdit(post)}
+            style={styles.editButton}
+          >
+            <MaterialIcons name="edit" size={20} color="#49250D" />
+          </TouchableOpacity>
+        )}
+      </View>
+      <Text style={styles.postQuestion}>{post.question}</Text>
+    </View>
+  );
+};
 
 export default function ForumPage() {
   const [popUpVisible, setPopUpVisible] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Get current user's username
+  const getCurrentUsername = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data: userData } = await supabase
+      .from('users_data')
+      .select('username')
+      .eq('email', user.email)
+      .single();
+
+    return userData?.username || null;
+  };
 
   // Fetch posts from Supabase
   const fetchPosts = async () => {
@@ -45,16 +85,26 @@ export default function ForumPage() {
       .order('created_at', { ascending: false });
     if (!error && data) {
       setPosts(data as Post[]);
-      // console.log('Fetched posts:', data); // <-- Add this line
     }
     setLoading(false);
   };
 
   useEffect(() => {
     fetchPosts();
+    getCurrentUsername().then(setCurrentUsername);
   }, []);
 
   const addDiscuss = (event: GestureResponderEvent) => {
+    setPopUpVisible(true);
+    setIsEditing(false);
+    setEditingPost(null);
+    setCaption('');
+  };
+
+  const handleEditPost = (post: Post) => {
+    setEditingPost(post);
+    setCaption(post.question);
+    setIsEditing(true);
     setPopUpVisible(true);
   };
 
@@ -68,43 +118,91 @@ export default function ForumPage() {
       return;
     }
 
-    // Always fetch username from users_data table using email
-    const { data: userData } = await supabase
-      .from('users_data')
-      .select('username')
-      .eq('email', user.email)
-      .single();
+    if (isEditing && editingPost) {
+      // Update existing post
+      const { error } = await supabase
+        .from('forum_posts')
+        .update({ question: caption })
+        .eq('id', editingPost.id);
 
-    const username = userData?.username;
-
-    if (!username) {
-      alert('Username not found.');
-      return;
-    }
-
-    console.log('Posting as username:', username);
-
-    const colorArr = ['#FFD6D6', '#D6FFD6', '#D6F5FF', '#EAD6FF'];
-    const color = colorArr[posts.length % 4];
-
-    const { error } = await supabase.from('forum_posts').insert([
-      {
-        author: username, 
-        question: caption,
-        color,
+      if (error) {
+        console.log('Supabase update error:', error.message);
+        alert('Failed to update post: ' + error.message);
+        return;
       }
-    ]);
-    if (error) {
-      console.log('Supabase insert error:', error.message);
-      alert('Failed to post: ' + error.message);
-      return;
+    } else {
+      // Create new post
+      // Always fetch username from users_data table using email
+      const { data: userData } = await supabase
+        .from('users_data')
+        .select('username')
+        .eq('email', user.email)
+        .single();
+
+      const username = userData?.username;
+
+      if (!username) {
+        alert('Username not found.');
+        return;
+      }
+
+      console.log('Posting as username:', username);
+
+      const colorArr = ['#FFD6D6', '#D6FFD6', '#D6F5FF', '#EAD6FF'];
+      const color = colorArr[posts.length % 4];
+
+      const { error } = await supabase.from('forum_posts').insert([
+        {
+          author: username, 
+          question: caption,
+          color,
+        }
+      ]);
+      
+      if (error) {
+        console.log('Supabase insert error:', error.message);
+        alert('Failed to post: ' + error.message);
+        return;
+      }
     }
+
     setCaption('');
     setPopUpVisible(false);
+    setIsEditing(false);
+    setEditingPost(null);
     await fetchPosts();
   };
 
-  const router = useRouter()
+  const handleDeletePost = async () => {
+    if (!editingPost) return;
+
+    const { error } = await supabase
+      .from('forum_posts')
+      .delete()
+      .eq('id', editingPost.id);
+
+    if (error) {
+      console.log('Supabase delete error:', error.message);
+      alert('Failed to delete post: ' + error.message);
+      return;
+    }
+
+    setCaption('');
+    setPopUpVisible(false);
+    setIsEditing(false);
+    setEditingPost(null);
+    await fetchPosts();
+  };
+
+  const closeModal = () => {
+    setPopUpVisible(false);
+    setIsEditing(false);
+    setEditingPost(null);
+    setCaption('');
+  };
+
+  const router = useRouter();
+  
   return (
     <SafeAreaView style={styles.container}>
       {/* Back Button */}
@@ -114,13 +212,29 @@ export default function ForumPage() {
       >
         <AntDesign name="arrowleft" size={28} color="#7B5A36" />
       </TouchableOpacity>
-      <Modal animationType='slide' transparent={true} visible={popUpVisible}
-        onRequestClose={() => setPopUpVisible(!popUpVisible)}
+      
+      <Modal 
+        animationType='slide' 
+        transparent={true} 
+        visible={popUpVisible}
+        onRequestClose={closeModal}
       >
         <View style={styles.popUpCenteredView}>
           <View style={styles.popUpView}>
             <View style={styles.popUpHeader}>
-              <Text style={styles.captionTitle}>caption</Text>
+              <View style={styles.modalHeaderRow}>
+                <Text style={styles.captionTitle}>
+                  {isEditing ? 'Edit Post' : 'New Post'}
+                </Text>
+                {isEditing && (
+                  <TouchableOpacity
+                    onPress={handleDeletePost}
+                    style={styles.deleteButton}
+                  >
+                    <MaterialIcons name="delete" size={24} color="#B4656F" />
+                  </TouchableOpacity>
+                )}
+              </View>
               {/* Caption Input */}
               <TextInput
                 style={styles.captionInput}
@@ -130,40 +244,47 @@ export default function ForumPage() {
                 onChangeText={setCaption}
               />
             </View>
-            {/* Post Button */}
-            <TouchableOpacity
-              style={styles.postButton}
-              onPress={handlePost}
-            >
-              <Text style={styles.postButtonText}>POST</Text>
-            </TouchableOpacity>
+            {/* Action Buttons */}
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={closeModal}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.postButton}
+                onPress={handlePost}
+              >
+                <Text style={styles.postButtonText}>
+                  {isEditing ? 'UPDATE' : 'POST'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
+      
       <View style={styles.content}>
         <ScrollView>
-          {/* Tabs */}
-          {/* <View style={styles.tabs}>
-            <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-              <Text style={styles.activeTabText}>Discussion</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tab} onPress={() => router.push('./forumSes')}>
-              <Text style={styles.tabText}>Session</Text>
-            </TouchableOpacity>
-          </View> */}
           {/* Discussion tab */}
-            <View style={styles.discussHeader}>
-              <Text style={styles.discussTitle}>DISCUSSION</Text>
-              <TouchableOpacity onPress={addDiscuss}>
-                <AntDesign name="pluscircleo" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.discussHeader}>
+            <Text style={styles.discussTitle}>DISCUSSION</Text>
+            <TouchableOpacity onPress={addDiscuss}>
+              <AntDesign name="pluscircleo" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
           <View style={styles.discussContainer}>
             {loading ? (
               <Text>Loading...</Text>
             ) : (
               posts.map(post => (
-                <PostCard key={post.id} post={post} />
+                <PostCard 
+                  key={post.id} 
+                  post={post} 
+                  currentUsername={currentUsername}
+                  onEdit={handleEditPost}
+                />
               ))
             )}
           </View>
@@ -238,13 +359,22 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
   },
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
   postAuthor: {
     fontWeight: 'bold',
-    marginBottom: 5,
     color: 'black',
+    flex: 1,
   },
   postQuestion: {
     color: 'black',
+  },
+  editButton: {
+    padding: 4,
   },
 
   // pop up post discuss
@@ -264,16 +394,20 @@ const styles = StyleSheet.create({
   popUpHeader: {
     top: 20,
     marginBottom: 40,
-    // display: 'flex',
-    // flexDirection: 'column'
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 5,
   },
   captionTitle: {
     fontWeight: 'bold',
-    alignSelf: 'flex-start',
-    marginLeft: 5,
-    marginBottom: 5,
     color: 'black',
     fontSize: 16,
+  },
+  deleteButton: {
+    padding: 4,
   },
   captionInput: {
     width: '100%',
@@ -284,16 +418,33 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     fontSize: 16,
     marginBottom: 30,
+    marginTop: 10,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   postButton: {
     backgroundColor: 'black',
     borderRadius: 20,
     paddingVertical: 15,
-    width: '100%',
+    flex: 1,
     alignItems: 'center',
   },
   postButtonText: {
     color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#E0E0E0',
+    borderRadius: 20,
+    paddingVertical: 15,
+    flex: 1,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: 'black',
     fontWeight: 'bold',
     fontSize: 16,
   },
