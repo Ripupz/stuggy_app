@@ -1,5 +1,5 @@
 # Stuggy App
-
+figma design: https://www.figma.com/design/aNdmPFKyXBIPDyShQijLB9/AOL-SOFTWARE-ENGINEERING--STUGGY-?node-id=0-1&p=f&t=c2uQMbdlFCSJTS9p-0
 A study companion app built with React Native, Expo, and Expo Router.
 
 ---
