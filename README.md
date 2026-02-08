@@ -1,5 +1,5 @@
 # Stuggy App
-A study companion app built with React Native, Expo, and Expo Router.
+Stuggy is a comprehensive study companion application designed to streamline the academic workflow for students. Built with a modern mobile stack consisting of React Native, Expo, and Expo Router, the app focuses on providing a centralized hub for task management, focus enhancement, and resource organization.
 
 figma design: https://www.figma.com/design/aNdmPFKyXBIPDyShQijLB9/AOL-SOFTWARE-ENGINEERING--STUGGY-?node-id=0-1&p=f&t=c2uQMbdlFCSJTS9p-0
 ---
